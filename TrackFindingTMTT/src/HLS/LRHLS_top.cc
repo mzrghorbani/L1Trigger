@@ -14,10 +14,11 @@ namespace TMTT {
 namespace HLS {
 #endif
 
-void LRHLS_top(DataHLS *dataHLS) {
+void LRHLS_top(TrackHLS *trackIn, TrackHLS *trackOut) {
 
-    LRHLS_v0 lrhlsV0(dataHLS);
-    lrhlsV0.produce();
+    LRHLS_v1 lrhlsV1(trackIn, trackOut);
+
+    lrhlsV1.produce();
 
 }
 

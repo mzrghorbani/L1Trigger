@@ -29,9 +29,9 @@ public:
     int14_t phiHLS() const;
     int14_t zHLS() const;
     uint3_t layerIdHLS() const;
-    uint1_t psModuleHLS() const;
-    uint1_t barrelHLS() const;
-    uint1_t validHLS() const;
+    bool psModuleHLS() const;
+    bool barrelHLS() const;
+    bool validHLS() const;
 
 public:
 
@@ -39,9 +39,9 @@ public:
     int14_t phiHLS_;
     int14_t zHLS_;
     uint3_t layerIdHLS_;
-    uint1_t psModuleHLS_;
-    uint1_t barrelHLS_;
-    uint1_t validHLS_;
+    bool psModuleHLS_;
+    bool barrelHLS_;
+    bool validHLS_;
 
 };
 

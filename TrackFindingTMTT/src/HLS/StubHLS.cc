@@ -15,7 +15,7 @@ namespace HLS {
 #endif
 
 
-StubHLS::StubHLS() : rHLS_(0), phiHLS_(0), zHLS_(0), layerIdHLS_(0), psModuleHLS_(0), barrelHLS_(0), validHLS_(false) {
+StubHLS::StubHLS() : rHLS_(0), phiHLS_(0), zHLS_(0), layerIdHLS_(0), psModuleHLS_(false), barrelHLS_(false), validHLS_(false) {
 
 }
 
@@ -35,15 +35,15 @@ uint3_t StubHLS::layerIdHLS() const {
     return layerIdHLS_;
 }
 
-uint1_t StubHLS::psModuleHLS() const {
+bool StubHLS::psModuleHLS() const {
     return psModuleHLS_;
 }
 
-uint1_t StubHLS::barrelHLS() const {
+bool StubHLS::barrelHLS() const {
     return barrelHLS_;
 }
 
-uint1_t StubHLS::validHLS() const {
+bool StubHLS::validHLS() const {
     return validHLS_;
 }
 

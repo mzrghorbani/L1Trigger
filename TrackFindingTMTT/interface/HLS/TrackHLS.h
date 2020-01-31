@@ -28,23 +28,23 @@ public:
 
     ~TrackHLS() {}
 
-    const array_s<StubHLS> &stubsHLS() const;
-//    const StubHLS *stubsHLS() const;
+//    const array_s<StubHLS> &stubsHLS() const;
+    const StubHLS *stubsHLS() const;
     dtf_t qOverPtHLS() const;
     dtf_t phiHLS() const;
     dtf_t cotHLS() const;
     dtf_t zHLS() const;
-    uint1_t validHLS() const;
+    bool validHLS() const;
 
 public:
 
-array_s<StubHLS> stubsHLS_;
-//StubHLS stubsHLS_[12];
+//array_s<StubHLS> stubsHLS_;
+StubHLS stubsHLS_[12];
 dtf_t qOverPtHLS_;
 dtf_t phiHLS_;
 dtf_t cotHLS_;
 dtf_t zHLS_;
-uint1_t validHLS_;
+bool validHLS_;
 
 };
 
