@@ -1,9 +1,9 @@
-#include "/home/mghorbani/workspace/CMSSW_10_4_0/src/L1Trigger/TrackFindingTMTT/interface/Data.h"
-#include "/home/mghorbani/workspace/CMSSW_10_4_0/src/L1Trigger/TrackFindingTMTT/interface/Settings.h"
-#include "/home/mghorbani/workspace/CMSSW_10_4_0/src/L1Trigger/TrackFindingTMTT/interface/Stub.h"
-#include "/home/mghorbani/workspace/CMSSW_10_4_0/src/L1Trigger/TrackFindingTMTT/interface/TP.h"
-#include "/home/mghorbani/workspace/CMSSW_10_4_0/src/L1Trigger/TrackFindingTMTT/interface/Module.h"
-#include "/home/mghorbani/workspace/CMSSW_10_4_0/src/L1Trigger/TrackFindingTMTT/interface/Track.h"
+#include "L1Trigger/TrackFindingTMTT/interface/Data.h"
+#include "L1Trigger/TrackFindingTMTT/interface/Settings.h"
+#include "L1Trigger/TrackFindingTMTT/interface/Stub.h"
+#include "L1Trigger/TrackFindingTMTT/interface/TP.h"
+#include "L1Trigger/TrackFindingTMTT/interface/Module.h"
+#include "L1Trigger/TrackFindingTMTT/interface/Track.h"
 
 
 namespace TMTT {
