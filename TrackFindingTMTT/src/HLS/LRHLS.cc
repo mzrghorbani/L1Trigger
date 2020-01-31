@@ -40,7 +40,7 @@ void LRHLS::produce() {
             j++;
         }
 
-        std::cout << "in branch maziar" << std::endl;
+        std::cout << "track " << i << std::endl;
         TMTT::HLS::LRHLS_top(&trackMHTHLS, &trackLRHLS);
 
         data_->tracksLRHLS().push_back(trackMHT);
@@ -77,19 +77,19 @@ void LRHLS::produce() {
         i++;
     }
 
-//    for(auto track : data_->tracksLRHLS()) {
-//
-//        cout << "qOverPt : " << track->qOverPt() << endl;
-//        cout << "phi : " << track->phi() << endl;
-//        cout << "cot : " << track->cot() << endl;
-//        cout << "z : " << track->z() << endl;
-//
-//        for(auto stub : track->stubs()) {
-//            if(stub->valid()) {
-//                cout << "r : " << stub->layerId() << endl;
-//            }
-//
-//        }
-//    }
+    for(auto track : data_->tracksLRHLS()) {
+
+        cout << "qOverPt : " << track->qOverPt() << endl;
+        cout << "phi : " << track->phi() << endl;
+        cout << "cot : " << track->cot() << endl;
+        cout << "z : " << track->z() << endl;
+
+        for(auto stub : track->stubs()) {
+            if(stub->valid()) {
+                cout << "stub layer id : " << stub->layerId() << endl;
+            }
+
+        }
+    }
 
 }
