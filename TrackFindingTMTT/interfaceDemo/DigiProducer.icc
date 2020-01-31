@@ -1,0 +1,112 @@
+#include "L1Trigger/TrackFindingTMTT/interfaceDemo/DigiProducer.h"
+
+#include "Demonstrator/DataFormats/interface/DigiKF4Track.hpp"
+#include "Demonstrator/DataFormats/interface/DigiHTMiniStub.hpp"
+#include "Demonstrator/DataFormats/interface/DigiHTStub.hpp"
+#include "Demonstrator/DataFormats/interface/DigiGPStub.hpp"
+#include "Demonstrator/DataFormats/interface/DigiDTCStub.hpp"
+
+
+using namespace std;
+using namespace TMTT;
+
+namespace demo {
+
+DigiProducer::DigiProducer( const edm::ParameterSet& iConfig ) {
+
+  settings_  = new Settings ( iConfig          );
+  data_      = new Data     ( settings_        );
+
+  dtc_ = new DTC( settings_, data_ );
+  gp_  = new GP ( settings_, data_ );
+  ht_  = new HT ( settings_, data_ );
+  mht_ = new MHT( settings_, data_ );
+
+  digiConverter_ = new DigiConverter( settings_, data_ );
+
+  stubInputTag_ = consumes< DetSetVec >( settings_->inputTagStub() );
+
+  produces <DigiKF4TrackCollection>("SimDigiKF4Tracks").setBranchAlias("SimDigiKF4Tracks");
+  produces <DigiKF4TrackCollection>("SimDigiKF4TracksWithDups").setBranchAlias("SimDigiKF4TracksWithDups");
+  produces< DigiHTMiniStubCollection >( "SimDigiHTMiniStubs" ).setBranchAlias( "SimDigiHTMiniStubs" );
+  produces< DigiHTStubCollection >    ( "SimDigiHTStubs"     ).setBranchAlias( "SimDigiHTStubs"     );
+  produces< DigiGPStubCollection >    ( "SimDigiGPStubs"     ).setBranchAlias( "SimDigiGPStubs"     );
+  produces< DigiDTCStubCollection>    ( "SimDigiDTCStubs"    ).setBranchAlias( "SimDigiDTCStubs"    );
+
+}
+
+
+DigiProducer::~DigiProducer() {
+
+  delete settings_;
+  delete data_;
+  delete dtc_;
+  delete gp_;
+  delete ht_;
+  delete mht_;
+  delete digiConverter_;
+
+}
+
+
+void DigiProducer::beginRun( const edm::Run& iRun, const edm::EventSetup& iSetup ) {
+
+  edm::ESHandle< TrackerGeometry > trackerGeometryHandle;
+  iSetup.get< TrackerDigiGeometryRecord >().get( trackerGeometryHandle );
+  const TrackerGeometry* trackerGeometry = trackerGeometryHandle.product();
+
+  edm::ESHandle< TrackerTopology > trackerTopologyHandle;
+  iSetup.get< TrackerTopologyRcd >().get( trackerTopologyHandle );
+  const TrackerTopology* trackerTopology = trackerTopologyHandle.product();
+
+  Modules& modules = data_->modules();
+  for( const auto& detId : trackerGeometry->detIds() ) {
+    if ( detId.subdetId() == 1 || detId.subdetId() == 2 )
+      continue;
+    if ( !trackerTopology->isLower( detId ) )
+      continue;
+    //const int& dtcId = cablingMap_.at( detId.rawId() - 1 );
+    const int dtcId = 0; // Use if no cable map.
+    modules.insert( make_pair( detId.rawId(), new Module( settings_, trackerGeometry, trackerTopology, detId, dtcId ) ) );
+  }
+
+}
+
+
+void DigiProducer::produce( edm::Event& iEvent, const edm::EventSetup& iSetup ) {
+
+  data_->clear();
+
+  edm::Handle< DetSetVec > ttStubHandle;
+  iEvent.getByToken( stubInputTag_, ttStubHandle );
+
+  const Modules& modules = data_->modules();
+        Stubs&   stubs   = data_->stubs();
+
+  int id( 0 );
+  for ( DetSetVec::const_iterator ttModule = ttStubHandle->begin(); ttModule != ttStubHandle->end(); ttModule++ ) {
+    int n( 0 );
+    Module* module = nullptr;
+    for ( DetSet::const_iterator stub = ttModule->begin(); stub != ttModule->end(); stub++ ) {
+      const TTStubRef& ttStubRef = edmNew::makeRefTo( ttStubHandle, stub );
+      if ( n++ == 0 )
+        module = modules.at( ttStubRef->getDetId().rawId() + 1 );
+      stubs.push_back( new Stub( settings_, module, ttStubRef ) );
+    }
+  }
+
+  dtc_->produce();
+
+  gp_ ->produce();
+
+  ht_ ->produce();
+
+  mht_->produce();
+
+  digiConverter_->put( iEvent );
+
+}
+
+DEFINE_FWK_MODULE(DigiProducer);
+
+}

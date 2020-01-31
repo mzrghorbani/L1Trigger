@@ -1,0 +1,236 @@
+#include "L1Trigger/TrackFindingTMTT/interfaceDemo/DigiConverter.h"
+
+#include "L1Trigger/TrackFindingTMTT/interface/Stub.h"
+#include "L1Trigger/TrackFindingTMTT/interface/Track.h"
+
+#include "Demonstrator/DataFormats/interface/DigiKF4Track.hpp"
+#include "Demonstrator/DataFormats/interface/DigiHTMiniStub.hpp"
+#include "Demonstrator/DataFormats/interface/DigiHTStub.hpp"
+#include "Demonstrator/DataFormats/interface/DigiGPStub.hpp"
+#include "Demonstrator/DataFormats/interface/DigiDTCStub.hpp"
+
+
+using namespace std;
+using namespace TMTT;
+
+namespace demo {
+
+DigiConverter::DigiConverter( const Settings* settings, Data* data ) :
+  settings_        ( settings                    ),
+  data_            ( data                        ),
+  numRegions_      ( settings->dtcNumRegions()   ),
+  numSectorsEta_   ( settings->gpNumSectorsEta() ),
+  baseBend_        ( settings->baseBend()        ),
+  baseM_           ( settings->baseM()           ),
+  baseC_           ( settings->baseC()           ),
+  baseR_           ( settings->baseR()           ),
+  basePhi_         ( settings->basePhi()         ),
+  baseZ_           ( settings->baseZ()           ),
+  baseRegion_      ( settings->baseRegion()      ),
+  baseSector_      ( settings->baseSector()      ),
+  baseCotTheta_    ( settings->baseCotTheta()    ),
+  chosenRofPhi_    ( settings->chosenRofPhi()    ),
+  chosenRofZ_      ( settings->chosenRofZ()      ),
+  numBinsPt_       ( settings->htNumBinsPt()     ),
+  numBinsPhi_      ( settings->htNumBinsPhi()    ),
+  sectorsCot_      ( settings->cots()            ),
+  numLinksDTC_     ( settings->dtcNumPerTFP()    ),
+  numLinksGP_      ( settings->numSectors()      ),
+  numLinksHT_      ( numBinsPt_                  ),
+  numLinksMHT_     ( numBinsPt_                  ) {}
+
+
+void DigiConverter::put( edm::Event& iEvent ) const {
+
+  putDTC( iEvent );
+
+  putGP ( iEvent );
+
+  putHT ( iEvent );
+
+  putMHT( iEvent );
+
+  putKF4( iEvent );
+
+}
+
+
+void DigiConverter::putDTC( edm::Event& iEvent ) const {
+
+  DigiDTCStubCollection allDigiDTCStubs;
+
+  const Stubs& stubs = data_->stubs();
+
+  for ( Stub* stub: stubs ) {
+
+    const double r    = stub->r() - chosenRofPhi_;
+    const double z    = stub->z();
+    const double bend = stub->bend();
+    for( const int& id :stub->dtcStreamIds() ) {
+
+      const int    region = id / numLinksDTC_;
+      const int    link   = id % numLinksDTC_;
+      const int&   pos    = stub->dtcStreamPos( id );
+      const double phi    = reco::deltaPhi( stub->phi() - ( region + 1 ) * baseRegion_, 0. );
+
+      DigiDTCStub aDTCStub( floor( phi / basePhi_ ), 0, 0, floor( z / baseZ_ ), floor( bend / baseBend_ ), floor( r / baseR_ ), true );
+      aDTCStub.setRouteId( { (uint16_t)region, (uint16_t)link, (uint16_t)pos } );
+      allDigiDTCStubs.push_back( aDTCStub );
+
+    }
+
+  }
+
+  allDigiDTCStubs.shrink_to_fit();
+
+  iEvent.put( move( make_unique< DigiDTCStubCollection >( allDigiDTCStubs ) ), "SimDigiDTCStubs" );
+
+}
+
+
+void DigiConverter::putGP( edm::Event& iEvent ) const {
+
+  DigiGPStubCollection allDigiGPStubs;
+
+  const Stubs& stubs = data_->stubs();
+
+  for ( Stub* stub: stubs ) {
+
+    const Range& rangePt = stub->rangePt();
+    const double r       = digi( stub->r() - chosenRofPhi_, baseR_ );
+    const int    layer   = stub->layerId();
+    const int    ptMin   = rangePt.first  - numBinsPt_ / 2;
+    const int    ptMax   = rangePt.second - numBinsPt_ / 2;
+    for( const int& id :stub->gpStreamIds() ) {
+
+      const int    region = id / numLinksGP_;
+      const int    link   = id % numLinksGP_;
+      const int&   pos    = stub->gpStreamPos( id );
+      const int    secPhi = link / numSectorsEta_;
+      const int    secEta = link % numSectorsEta_;
+      const double phi    = digi( reco::deltaPhi( stub->phi() - ( region + 1 ) * baseRegion_, .0 ), basePhi_ ) - ( secPhi - .5 ) * baseSector_;
+      const double z      = digi( stub->z(), baseZ_ ) - ( r + digi( chosenRofPhi_, baseR_ ) ) * digi( sectorsCot_[ secEta ], baseCotTheta_ );
+
+      DigiGPStub aGPStub( ptMin, ptMax, layer, floor( z / baseZ_ ), floor( phi / basePhi_ ), floor( r / baseR_ ), true );
+      aGPStub.setRouteId( { (uint16_t)region, (uint16_t)link, (uint16_t)pos } );
+      allDigiGPStubs.push_back( aGPStub );
+
+    }
+
+  }
+
+  allDigiGPStubs.shrink_to_fit();
+
+  iEvent.put( move( make_unique< DigiGPStubCollection >( allDigiGPStubs ) ), "SimDigiGPStubs" );
+
+}
+
+
+void DigiConverter::putHT( edm::Event& iEvent ) const {
+
+  DigiHTStubCollection allDigiHTStubs;
+
+  const Tracks& tracks = data_->tracksHT();
+
+  Trackss trackStreams( numRegions_ * numLinksHT_ );
+  for ( Track* track : tracks )
+    trackStreams[ track->streamId() ].push_back( track );
+
+  for ( int id = 0; id < numRegions_ * numLinksHT_; id++ ) {
+
+    const Tracks& trackStream = trackStreams[ id ];
+    const int     region      = id / numLinksHT_;
+    const int     link        = id % numLinksHT_;
+    int pos( 0 );
+    for ( Track* track : trackStream ) {
+
+                   pos    = track->streamPos();
+      const int&   binPt  = track->binPt();
+      const int&   binPhi = track->binPhi();
+      const int&   secEta = track->secEta();
+      const int&   secPhi = track->secPhi();
+      const Stubs& stubs  = track->stubs();
+      for ( Stub* stub : stubs ) {
+
+        const double r     = digi( stub->r() - chosenRofPhi_, baseR_ );
+        const double phi   = digi( reco::deltaPhi( stub->phi() - ( region + 1 ) * baseRegion_, .0 ), basePhi_ ) - ( secPhi - .5 ) * baseSector_ - ( binPhi + .5 ) * baseC_ + ( binPt +.5 ) * baseM_ * r;
+        const double z     = digi( stub->z(), baseZ_ ) - ( r + digi( chosenRofPhi_, baseR_ ) ) * digi( sectorsCot_[ secEta ], baseCotTheta_ );
+        const int    layer = stub->layerId() + 1;
+        const int    mSel  = binPt >= 0;
+
+        DigiHTStub aHTStub( layer, secEta, binPhi, floor( z / baseZ_ ), floor( phi / basePhi_ ), floor( r / baseR_ ), mSel, true );
+        aHTStub.setRouteId( { (uint16_t)region, (uint16_t)link, (uint16_t)pos++ } );
+        allDigiHTStubs.push_back( aHTStub );
+
+      }
+
+    }
+
+  }
+
+  allDigiHTStubs.shrink_to_fit();
+
+  iEvent.put( move( make_unique< DigiHTStubCollection >( allDigiHTStubs ) ), "SimDigiHTStubs" );
+
+}
+
+
+void DigiConverter::putMHT( edm::Event& iEvent ) const {
+
+  DigiHTMiniStubCollection allDigiHTMiniStubs;
+
+  const Tracks& tracks = data_->tracksMHT();
+
+  Trackss trackStreams( numRegions_ * numLinksMHT_ );
+  for ( Track* track : tracks )
+    trackStreams[ track->streamId() ].push_back( track );
+
+  for ( int id = 0; id < numRegions_ * numLinksHT_; id++ ) {
+
+    Tracks& trackStream = trackStreams[ id ];
+    const int region    = id / numLinksHT_;
+    const int link      = id % numLinksHT_;
+    int pos( 0 );
+    for ( Track* track : trackStream ) {
+
+                   pos    = track->streamPos();
+      const int&   binPt  = track->binPt();
+      const int&   binPhi = track->binPhi();
+      const int&   secEta = track->secEta();
+      const int&   secPhi = track->secPhi();
+      const Stubs& stubs  = track->stubs();
+      for ( Stub* stub : stubs ) {
+
+        const double r     = stub->r() - chosenRofPhi_;
+        const double phi   = digi( reco::deltaPhi( stub->phi() - ( region + 1 ) * baseRegion_, .0 ), basePhi_ ) - ( secPhi - .5 ) * baseSector_;
+        const double z     = stub->z();
+        const int    layer = stub->layerId() + 1;
+
+        DigiHTMiniStub aMHTStub( layer, secEta, binPhi, binPt, floor( phi / basePhi_ ), floor( z / baseZ_ ), floor( r / baseR_ ), true );
+        aMHTStub.setRouteId( { (uint16_t)region, (uint16_t)link, (uint16_t)pos++ } );
+        allDigiHTMiniStubs.push_back( aMHTStub );
+
+      }
+
+    }
+
+  }
+
+  allDigiHTMiniStubs.shrink_to_fit();
+
+  iEvent.put( move( make_unique< DigiHTMiniStubCollection >( allDigiHTMiniStubs ) ), "SimDigiHTMiniStubs" );
+
+}
+
+void DigiConverter::putKF4( edm::Event& iEvent ) const {
+
+  DigiKF4TrackCollection allDigiKF4Tracks;
+
+  allDigiKF4Tracks.shrink_to_fit(); 
+
+  iEvent.put( move( make_unique< DigiKF4TrackCollection >( allDigiKF4Tracks ) ), "SimDigiKF4TracksWithDups" );
+  iEvent.put( move( make_unique< DigiKF4TrackCollection >( allDigiKF4Tracks ) ), "SimDigiKF4Tracks" );
+
+}
+
+}
