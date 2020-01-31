@@ -1,8 +1,8 @@
 #ifndef __DATA_H__
 #define __DATA_H__
 
-#include "/home/mghorbani/workspace/CMSSW_10_4_0/src/L1Trigger/TrackFindingTMTT/plugins/TMTrackProducerFwd.h"
-#include "/home/mghorbani/workspace/CMSSW_10_4_0/src/L1Trigger/TrackFindingTMTT/interface/SLV.h"
+#include "L1Trigger/TrackFindingTMTT/plugins/TMTrackProducerFwd.h"
+#include "L1Trigger/TrackFindingTMTT/interface/SLV.h"
 
 #include <string>
 #include <vector>
