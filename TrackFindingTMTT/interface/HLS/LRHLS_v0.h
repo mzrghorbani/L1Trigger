@@ -43,20 +43,19 @@ public:
     bool killLargestResidual();
     void findLargestResidual();
 
-private:
+public:
 
     DataHLS *dataHLS_;
     TrackHLS trackIn_;
     TrackHLS trackOut_;
-//    array_s<LRStub> stubs_;
     array_s<residData> residuals_;
     LRTrack HTParameter_;
     LRTrack LRParameter_;
-    uint4_t layerPopulation_[7]{};
+    uint3_t layerPopulation_[7];
     stubData layerPos_[7];
     residData largestResid_;
-    uint4_t nLayers_;
-    uint4_t nLayersPS_;
+    uint3_t nLayers_;
+    uint3_t nLayersPS_;
     uint4_t nStubs_;
     uint4_t nIterations_;
     uint4_t maxIterations_;

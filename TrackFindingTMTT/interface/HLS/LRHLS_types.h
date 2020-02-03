@@ -30,21 +30,21 @@ enum {
     WB = 21, IB = 17, FB = WB - IB
 };
 
+// HLS variables for HW tests
 //typedef ap_uint<B1> uint1_t;
 //typedef ap_uint<B3> uint3_t;
 //typedef ap_uint<B4> uint4_t;
 //typedef ap_int<B13> int13_t;
 //typedef ap_int<B14> int14_t;
-//
 //typedef ap_fixed<WB,IB> dtf_t;
 
-typedef double int13_t;
-typedef double int14_t;
+// HLS variables for SW tests
+typedef float int13_t;
+typedef float int14_t;
 typedef int uint4_t;
 typedef int uint3_t;
 typedef bool uint1_t;
-
-typedef double dtf_t;
+typedef float dtf_t;
 
 template<typename T>
 T abs_t(const T &a) {
@@ -71,9 +71,7 @@ template<typename T1, typename T2>
 struct pair_t {
     T1 first;
     T2 second;
-
     pair_t() : first(0), second(0) {}
-
     pair_t(const T1 &a, const T2 &b) : first(a), second(b) {}
 };
 
@@ -84,10 +82,8 @@ pair_t<T1, T2> make_pair_t(const T1 &a, const T2 &b) {
 
 template<typename T>
 struct array_t {
-
     int size_;
     T data_[250];
-
     array_t() : size_(0) {}
     void push_back(const T &value) { data_[size_++] = value; }
     T &operator[](const int &idx) { return data_[idx]; }
@@ -102,10 +98,8 @@ struct array_t {
 
 template<typename T>
 struct array_s {
-
     int size_;
     T data_[12];
-
     array_s() : size_(0) {}
     void push_back(const T &value) { data_[size_++] = value; }
     T &operator[](const int &idx) { return data_[idx]; }

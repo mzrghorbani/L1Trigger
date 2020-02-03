@@ -17,6 +17,7 @@ namespace HLS {
 void LRHLS_top(DataHLS *dataHLS) {
 
     LRHLS_v0 lrhlsV0(dataHLS);
+
     lrhlsV0.produce();
 
 }

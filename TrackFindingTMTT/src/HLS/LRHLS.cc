@@ -43,7 +43,6 @@ void LRHLS::produce() {
         i++;
     }
 
-    cout << "in branch master" << endl;
     TMTT::HLS::LRHLS_top(dataHLS);
 
     for(auto trackMHT : data_->tracksMHT()) {
