@@ -13,52 +13,62 @@ LRHLS::LRHLS(Settings *settings, Data *data) : settings_(settings), data_(data) 
 
 void LRHLS::produce() {
 
-    auto *dataHLS = new DataHLS();
-
     int i = 0;
     int j = 0;
 
     for (auto trackMHT : data_->tracksMHT()) {
 
         TrackHLS trackMHTHLS;
-        trackMHTHLS.qOverPtHLS_ = trackMHT->qOverPt();
-        trackMHTHLS.phiHLS_ = trackMHT->phi();
-        trackMHTHLS.cotHLS_ = trackMHT->cot();
-        trackMHTHLS.zHLS_ = trackMHT->z();
-        trackMHTHLS.validHLS_ = trackMHT->valid();
-        dataHLS->tracksMHTHLS_.push_back(trackMHTHLS);
+        TrackHLS trackLRHLS;
 
+        trackMHTHLS.qOverPt_ = trackMHT->qOverPt();
+        trackMHTHLS.phi_ = trackMHT->phi();
+        trackMHTHLS.cot_ = trackMHT->cot();
+        trackMHTHLS.z_ = trackMHT->z();
+        trackMHTHLS.valid_ = trackMHT->valid();
+
+        j = 0;
         for (auto stubMHT : trackMHT->stubs()) {
 
-            StubHLS stubMHTHLS;
-            stubMHTHLS.rHLS_ = stubMHT->r();
-            stubMHTHLS.phiHLS_ = stubMHT->phi();
-            stubMHTHLS.zHLS_ = stubMHT->z();
-            stubMHTHLS.layerIdHLS_ = stubMHT->layerId();
-            stubMHTHLS.psModuleHLS_ = stubMHT->psModule();
-            stubMHTHLS.barrelHLS_ = stubMHT->barrel();
-            stubMHTHLS.validHLS_ = stubMHT->valid();
-            dataHLS->tracksMHTHLS_[i].stubsHLS_.push_back(stubMHTHLS);
-        }
-        i++;
-    }
-
-    cout << "in branch master" << endl;
-    TMTT::HLS::LRHLS_top(dataHLS);
-
-    for(auto trackMHT : data_->tracksMHT()) {
-        data_->tracksLRHLS_.push_back(trackMHT);
-    }
-
-
-    i = 0;
-    for(auto trackLR : data_->tracksLRHLS()) {
-        trackLR->valid_ = dataHLS->tracksLRHLS()[i].validHLS();
-        j = 0;
-
-        for(auto stubLR : trackLR->stubs()) {
-            stubLR->valid_ = dataHLS->tracksLRHLS()[i].stubsHLS()[j].validHLS();
+            trackMHTHLS.stubs_[j].r_ = stubMHT->r();
+            trackMHTHLS.stubs_[j].phi_ = stubMHT->phi();
+            trackMHTHLS.stubs_[j].z_ = stubMHT->z();
+            trackMHTHLS.stubs_[j].layerId_ = stubMHT->layerId();
+            trackMHTHLS.stubs_[j].valid_ = stubMHT->valid();
             j++;
+        }
+
+        std::cout << "track " << i;
+        TMTT::HLS::LRHLS_top(&trackMHTHLS, &trackLRHLS);
+
+        data_->tracksLRHLS().push_back(trackMHT);
+
+        data_->tracksLRHLS_[i]->qOverPt_ = trackLRHLS.qOverPt();
+        data_->tracksLRHLS_[i]->phi_ = trackLRHLS.phi();
+        data_->tracksLRHLS_[i]->cot_ = trackLRHLS.cot();
+        data_->tracksLRHLS_[i]->z_ = trackLRHLS.z();
+        data_->tracksLRHLS_[i]->valid_ = trackLRHLS.valid();
+
+        j = 0;
+        for(auto stubLRHLS : data_->tracksLRHLS()[i]->stubs()) {
+
+            if(trackLRHLS.stubs_[j].valid()) {
+
+                stubLRHLS->r_ = trackLRHLS.stubs_[j].r();
+                stubLRHLS->phi_ = trackLRHLS.stubs_[j].phi();
+                stubLRHLS->z_ = trackLRHLS.stubs_[j].z();
+                stubLRHLS->module_->layerId_ = trackLRHLS.stubs_[j].layerId();
+                stubLRHLS->valid_ = trackLRHLS.stubs_[j].valid();
+                j++;
+            } else {
+                stubLRHLS->r_ = 0;
+                stubLRHLS->phi_ = 0;
+                stubLRHLS->z_ = 0;
+                stubLRHLS->module_->layerId_ = 0;
+                stubLRHLS->module_->psModule_ = false;
+                stubLRHLS->module_->barrel_ = false;
+                stubLRHLS->valid_ = false;
+            }
         }
         i++;
     }

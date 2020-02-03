@@ -9,7 +9,6 @@ Created by Maziar Ghorbani - Brunel University on 12/06/19.
 #include "L1Trigger/TrackFindingTMTT/interface/Data.h"
 #include "L1Trigger/TrackFindingTMTT/interface/Track.h"
 #include "L1Trigger/TrackFindingTMTT/interface/Stub.h"
-#include "L1Trigger/TrackFindingTMTT/interface/HLS/DataHLS.h"
 #include "L1Trigger/TrackFindingTMTT/interface/HLS/TrackHLS.h"
 #include "L1Trigger/TrackFindingTMTT/interface/HLS/StubHLS.h"
 #include "L1Trigger/TrackFindingTMTT/interface/HLS/LRHLS_top.h"

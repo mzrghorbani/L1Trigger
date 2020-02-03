@@ -15,36 +15,28 @@ namespace HLS {
 #endif
 
 
-StubHLS::StubHLS() : rHLS_(0), phiHLS_(0), zHLS_(0), layerIdHLS_(0), psModuleHLS_(0), barrelHLS_(0), validHLS_(false) {
+StubHLS::StubHLS() : r_(0), phi_(0), z_(0), layerId_(0), valid_(false) {
 
 }
 
-int13_t StubHLS::rHLS() const {
-    return rHLS_;
+int13_t StubHLS::r() const {
+    return r_;
 }
 
-int14_t StubHLS::phiHLS() const {
-    return phiHLS_;
+int14_t StubHLS::phi() const {
+    return phi_;
 }
 
-int14_t StubHLS::zHLS() const {
-    return zHLS_;
+int14_t StubHLS::z() const {
+    return z_;
 }
 
-uint3_t StubHLS::layerIdHLS() const {
-    return layerIdHLS_;
+uint3_t StubHLS::layerId() const {
+    return layerId_;
 }
 
-uint1_t StubHLS::psModuleHLS() const {
-    return psModuleHLS_;
-}
-
-uint1_t StubHLS::barrelHLS() const {
-    return barrelHLS_;
-}
-
-uint1_t StubHLS::validHLS() const {
-    return validHLS_;
+bool StubHLS::valid() const {
+    return valid_;
 }
 
 #ifdef CMSSW_GIT_HASH

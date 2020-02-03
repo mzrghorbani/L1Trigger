@@ -2,17 +2,15 @@
 Created by Maziar Ghorbani - Brunel University on 12/06/19.
 */
 
-#ifndef __LRHLS_V0_H__
-#define __LRHLS_V0_H__
+#ifndef __LRHLS_V2_H__
+#define __LRHLS_V2_H__
 
 #ifdef CMSSW_GIT_HASH
 #include "L1Trigger/TrackFindingTMTT/interface/HLS/LRHLS_types.h"
-#include "L1Trigger/TrackFindingTMTT/interface/HLS/DataHLS.h"
 #include "L1Trigger/TrackFindingTMTT/interface/HLS/TrackHLS.h"
 #include "L1Trigger/TrackFindingTMTT/interface/HLS/StubHLS.h"
 #else
 #include "LRHLS_types.h"
-#include "DataHLS.h"
 #include "TrackHLS.h"
 #include "StubHLS.h"
 #endif
@@ -23,44 +21,39 @@ namespace TMTT {
 namespace HLS {
 #endif
 
-
-
-class LRHLS_v0 {
+class LRHLS_v2 {
 
 public:
 
 
-    LRHLS_v0(DataHLS *dataHLS);
+    LRHLS_v2(TrackHLS *trackIn, TrackHLS *trackOut);
 
-    ~LRHLS_v0(){}
+    ~LRHLS_v2(){}
 
     void produce();
     void initFit();
-    void create();
     bool checkValidity();
     void calcHelix();
     void calcResidual();
-    bool killLargestResidual();
-    void findLargestResidual();
+    void findLeastResid();
+    void keepLeastResid();
+    void returnTrack();
+    void createTrack();
 
-private:
+public:
 
-    DataHLS *dataHLS_;
-    TrackHLS trackIn_;
-    TrackHLS trackOut_;
-//    array_s<LRStub> stubs_;
-    array_s<residData> residuals_;
-    LRTrack HTParameter_;
+    TrackHLS *trackIn_;
+    TrackHLS *trackOut_;
     LRTrack LRParameter_;
-    uint4_t layerPopulation_[7]{};
+    LRStub stubs_[12];
     stubData layerPos_[7];
-    residData largestResid_;
-    uint4_t nLayers_;
-    uint4_t nLayersPS_;
+    residData residuals_[12];
+    residData layerMinResid_[7];
+    uint3_t layerPopulation_[7];
+    uint3_t nLayers_;
     uint4_t nStubs_;
-    uint4_t nIterations_;
-    uint4_t maxIterations_;
     bool valid_;
+
 
 };
 
