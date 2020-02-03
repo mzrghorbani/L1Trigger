@@ -2,13 +2,13 @@
 Created by Maziar Ghorbani - Brunel University on 12/06/19.
 */
 
-#ifndef __TRACK_H__
-#define __TRACK_H__
+#ifndef __TRACKHLS_H__
+#define __TRACKHLS_H__
 
 
 #ifdef CMSSW_GIT_HASH
-#include "L1Trigger/TrackFindingTMTT/interface//LR_types.h"
-#include "L1Trigger/TrackFindingTMTT/interface//StubHLS.h"
+#include "L1Trigger/TrackFindingTMTT/interface/HLS/LRHLS_types.h"
+#include "L1Trigger/TrackFindingTMTT/interface/HLS/StubHLS.h"
 #else
 #include "LRHLS_types.h"
 #include "StubHLS.h"
@@ -17,7 +17,7 @@ Created by Maziar Ghorbani - Brunel University on 12/06/19.
 #ifdef CMSSW_GIT_HASH
 namespace TMTT {
 
-namespace  {
+namespace HLS {
 #endif
 
 class TrackHLS {

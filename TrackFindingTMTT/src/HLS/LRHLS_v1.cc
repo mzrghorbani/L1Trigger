@@ -3,7 +3,7 @@ Created by Maziar Ghorbani - Brunel University on 12/06/19.
 */
 
 #ifdef CMSSW_GIT_HASH
-#include "L1Trigger/TrackFindingTMTT/interface//LRHLS_v1.h"
+#include "L1Trigger/TrackFindingTMTT/interface/HLS/LRHLS_v1.h"
 #else
 #include "LRHLS_v1.h"
 #endif
@@ -11,7 +11,7 @@ Created by Maziar Ghorbani - Brunel University on 12/06/19.
 #ifdef CMSSW_GIT_HASH
 namespace TMTT {
 
-namespace  {
+namespace HLS {
 #endif
 
 LRHLS_v1::LRHLS_v1(TrackHLS *trackIn, TrackHLS *trackOut) :

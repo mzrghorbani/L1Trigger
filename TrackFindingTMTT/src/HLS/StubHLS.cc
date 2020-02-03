@@ -3,7 +3,7 @@ Created by Maziar Ghorbani - Brunel University on 12/06/19.
 */
 
 #ifdef CMSSW_GIT_HASH
-#include "L1Trigger/TrackFindingTMTT/interface//StubHLS.h"
+#include "L1Trigger/TrackFindingTMTT/interface/HLS/StubHLS.h"
 #else
 #include "StubHLS.h"
 #endif
@@ -11,7 +11,7 @@ Created by Maziar Ghorbani - Brunel University on 12/06/19.
 #ifdef CMSSW_GIT_HASH
 namespace TMTT {
 
-namespace  {
+namespace HLS {
 #endif
 
 
