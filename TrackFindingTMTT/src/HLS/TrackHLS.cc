@@ -3,7 +3,7 @@ Created by Maziar Ghorbani - Brunel University on 12/06/19.
 */
 
 #ifdef CMSSW_GIT_HASH
-#include "L1Trigger/TrackFindingTMTT/interface/HLS/TrackHLS.h"
+#include "L1Trigger/TrackFindingTMTT/interface//TrackHLS.h"
 #else
 #include "TrackHLS.h"
 #endif
@@ -11,37 +11,37 @@ Created by Maziar Ghorbani - Brunel University on 12/06/19.
 #ifdef CMSSW_GIT_HASH
 namespace TMTT {
 
-namespace HLS {
+namespace  {
 #endif
 
-TrackHLS::TrackHLS() : qOverPtHLS_(0), phiHLS_(0), cotHLS_(0), zHLS_(0), validHLS_(false) {}
+TrackHLS::TrackHLS() : qOverPt_(0), phi_(0), cot_(0), z_(0), valid_(false) {}
 
-//const array_s<StubHLS> &TrackHLS::stubsHLS() const {
-//    return stubsHLS_;
+//const array_s<Stub> &Track::stubs() const {
+//    return stubs_;
 //}
 
-const StubHLS *TrackHLS::stubsHLS() const {
-    return stubsHLS_;
+const StubHLS *TrackHLS::stubs() const {
+    return stubs_;
 }
 
-dtf_t TrackHLS::qOverPtHLS() const {
-    return qOverPtHLS_;
+dtf_t TrackHLS::qOverPt() const {
+    return qOverPt_;
 }
 
-dtf_t TrackHLS::phiHLS() const {
-    return phiHLS_;
+dtf_t TrackHLS::phi() const {
+    return phi_;
 }
 
-dtf_t TrackHLS::cotHLS() const {
-    return cotHLS_;
+dtf_t TrackHLS::cot() const {
+    return cot_;
 }
 
-dtf_t TrackHLS::zHLS() const {
-    return zHLS_;
+dtf_t TrackHLS::z() const {
+    return z_;
 }
 
-bool TrackHLS::validHLS() const {
-    return validHLS_;
+bool TrackHLS::valid() const {
+    return valid_;
 }
 
 #ifdef CMSSW_GIT_HASH

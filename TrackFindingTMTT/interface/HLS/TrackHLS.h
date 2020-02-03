@@ -2,13 +2,13 @@
 Created by Maziar Ghorbani - Brunel University on 12/06/19.
 */
 
-#ifndef __TRACKHLS_H__
-#define __TRACKHLS_H__
+#ifndef __TRACK_H__
+#define __TRACK_H__
 
 
 #ifdef CMSSW_GIT_HASH
-#include "L1Trigger/TrackFindingTMTT/interface/HLS/LRHLS_types.h"
-#include "L1Trigger/TrackFindingTMTT/interface/HLS/StubHLS.h"
+#include "L1Trigger/TrackFindingTMTT/interface//LR_types.h"
+#include "L1Trigger/TrackFindingTMTT/interface//StubHLS.h"
 #else
 #include "LRHLS_types.h"
 #include "StubHLS.h"
@@ -17,7 +17,7 @@ Created by Maziar Ghorbani - Brunel University on 12/06/19.
 #ifdef CMSSW_GIT_HASH
 namespace TMTT {
 
-namespace HLS {
+namespace  {
 #endif
 
 class TrackHLS {
@@ -28,23 +28,23 @@ public:
 
     ~TrackHLS() {}
 
-//    const array_s<StubHLS> &stubsHLS() const;
-    const StubHLS *stubsHLS() const;
-    dtf_t qOverPtHLS() const;
-    dtf_t phiHLS() const;
-    dtf_t cotHLS() const;
-    dtf_t zHLS() const;
-    bool validHLS() const;
+//    const array_s<Stub> &stubs() const;
+    const StubHLS *stubs() const;
+    dtf_t qOverPt() const;
+    dtf_t phi() const;
+    dtf_t cot() const;
+    dtf_t z() const;
+    bool valid() const;
 
 public:
 
-//array_s<StubHLS> stubsHLS_;
-StubHLS stubsHLS_[12];
-dtf_t qOverPtHLS_;
-dtf_t phiHLS_;
-dtf_t cotHLS_;
-dtf_t zHLS_;
-bool validHLS_;
+//array_s<Stub> stubs_;
+StubHLS stubs_[12];
+dtf_t qOverPt_;
+dtf_t phi_;
+dtf_t cot_;
+dtf_t z_;
+bool valid_;
 
 };
 

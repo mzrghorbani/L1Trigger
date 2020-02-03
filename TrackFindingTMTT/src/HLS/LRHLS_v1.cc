@@ -3,7 +3,7 @@ Created by Maziar Ghorbani - Brunel University on 12/06/19.
 */
 
 #ifdef CMSSW_GIT_HASH
-#include "L1Trigger/TrackFindingTMTT/interface/HLS/LRHLS_v1.h"
+#include "L1Trigger/TrackFindingTMTT/interface//LRHLS_v1.h"
 #else
 #include "LRHLS_v1.h"
 #endif
@@ -11,7 +11,7 @@ Created by Maziar Ghorbani - Brunel University on 12/06/19.
 #ifdef CMSSW_GIT_HASH
 namespace TMTT {
 
-namespace HLS {
+namespace  {
 #endif
 
 LRHLS_v1::LRHLS_v1(TrackHLS *trackIn, TrackHLS *trackOut) :
@@ -19,24 +19,22 @@ LRHLS_v1::LRHLS_v1(TrackHLS *trackIn, TrackHLS *trackOut) :
 
 	int i;
 
-	for(i = 0; i < 7; i++)
+	for (i = 0; i < 7; i++)
 		layerPopulation_[i] = 0;
 
-	for(i = 0; i < 12; i++) {
-		stubs_[i].rHLS_ = trackIn_->stubsHLS()[i].rHLS();
-		stubs_[i].phiHLS_ = trackIn_->stubsHLS()[i].phiHLS();
-		stubs_[i].zHLS_ = trackIn_->stubsHLS()[i].zHLS();
-		stubs_[i].layerIdHLS_ = trackIn_->stubsHLS()[i].layerIdHLS();
-		stubs_[i].psModuleHLS_ = trackIn_->stubsHLS()[i].psModuleHLS();
-		stubs_[i].barrelHLS_ = trackIn_->stubsHLS()[i].barrelHLS();
-		stubs_[i].validHLS_ = trackIn_->stubsHLS()[i].validHLS();
+	for (i = 0; i < 12; i++) {
+		stubs_[i].r = trackIn_->stubs_[i].r_;
+		stubs_[i].phi = trackIn_->stubs_[i].phi_;
+		stubs_[i].z = trackIn_->stubs_[i].z_;
+		stubs_[i].layerId = trackIn_->stubs_[i].layerId_;
+		stubs_[i].valid = trackIn_->stubs_[i].valid_;
 	}
 }
 
 
 void LRHLS_v1::produce() {
 
-    int i, j;
+    int i;
 
     initFit();
 
@@ -47,16 +45,17 @@ void LRHLS_v1::produce() {
         return;
     }
 
-    for(i = 0; i < 1; i++) {
+    int maxIterations = 12;
 
-        calcHelix();
-        calcResidual();
-        findLargestResid();
-        killLargestResid();
+    for (i = 0; i < maxIterations; i++) {
 
-        if(nStubs_ < 5)
-        	break;
+		calcHelix();
+		calcResidual();
+		findLargestResid();
+		killLargestResid();
 
+		if((nLayers_ < 3) && (nStubs_ < 3))
+			break;
     }
 	createTrack();
 }
@@ -68,15 +67,15 @@ void LRHLS_v1::initFit() {
 	int nLayers[7];
 
 	for(i = 0; i < 7; i++)
-        nLayers[i] = 0;
+		nLayers[i] = 0;
 
-	for(i = 0; i < 12; i++) {
+	for (i = 0; i < 12; i++) {
 
-		StubHLS stub = stubs_[i];
+		LRStub stub = stubs_[i];
 
-		if(stub.validHLS()) {
+		if (stub.valid) {
 
-			switch(stub.layerIdHLS()) {
+			switch (stub.layerId) {
 			case 1:
 				layerPopulation_[1]++;
 				nLayers[1] = 1;
@@ -123,29 +122,23 @@ void LRHLS_v1::initFit() {
 	}
 
 	for(i = 0; i < 7; i++)
-		nLayers_ = nLayers_ + nLayers[i];
+		nLayers_ += nLayers[i];
 }
 
 bool LRHLS_v1::checkValidity() {
 
-    bool valid = true;
+	int i;
 
-    if(nLayers_ < 3)
-        valid = false;
+    for (i = 0; i < 7; i++)
+    	if (layerPopulation_[i] > 1)
+    		return true;
 
-    if(nStubs_ < 3)
-        valid = false;
-
-	return valid;
+	return false;
 }
 
 void LRHLS_v1::calcHelix() {
 
 	int i;
-
-	sumData phiSums;
-
-	sumData zSums;
 
 	stubData layerMinPos[7];
 
@@ -165,15 +158,19 @@ void LRHLS_v1::calcHelix() {
 		layerMaxPos[i].Z = -4096;
 	}
 
-	for(i = 0; i < 12; i++) {
+	for (i = 0; i < 12; i++) {
 
-        StubHLS stub = stubs_[i];
+        LRStub stub = stubs_[i];
 
-		if(stub.validHLS()) {
+		if (stub.valid) {
 
-			stubData pos(stub.rHLS(), stub.phiHLS(), stub.rHLS(), stub.zHLS());
+			stubData pos;
+			pos.RPhi = stub.r;
+			pos.Phi = stub.phi;
+			pos.RZ = stub.r;
+			pos.Z = stub.z;
 
-			switch (stub.layerIdHLS()) {
+			switch (stub.layerId) {
 			case 1:
 				layerMinPos[1] <= pos;
 				layerMaxPos[1] >= pos;
@@ -227,19 +224,41 @@ void LRHLS_v1::calcHelix() {
 		}
 	}
 
+	sumData phiSum[7];
+
 	for (i = 0; i < 7; i++) {
-
 		if (layerPopulation_[i] > 0) {
-
-			phiSums += make_pair_t(layerPos_[i].RPhi, layerPos_[i].Phi);
-			zSums += make_pair_t(layerPos_[i].RZ, layerPos_[i].Z);
+			phiSum[i] += make_pair_t(layerPos_[i].RPhi, layerPos_[i].Phi);
 		}
+	}
+
+	sumData zSum[7];
+
+	for (i = 0; i < 7; i++) {
+		if (layerPopulation_[i] > 0) {
+			zSum[i] += make_pair_t(layerPos_[i].RZ, layerPos_[i].Z);
+		}
+	}
+
+	sumData phiSums;
+
+	for(i = 0; i < 7; i++) {
+		phiSums += phiSum[i];
+	}
+
+	sumData zSums;
+
+	for(i = 0; i < 7; i++) {
+		zSums += zSum[i];
 	}
 
 	const pair_t<dtf_t, dtf_t> &phiParameter = phiSums.calcLinearParameter();
 	const pair_t<dtf_t, dtf_t> &zParameter = zSums.calcLinearParameter();
 
-	LRParameter_ = LRParameter(phiParameter.first, phiParameter.second, zParameter.first, zParameter.second);
+	LRParameter_.qOverPt = phiParameter.first;
+	LRParameter_.phiT = phiParameter.second;
+	LRParameter_.cotT = zParameter.first;
+	LRParameter_.zT = zParameter.second;
 
 }
 
@@ -251,20 +270,17 @@ void LRHLS_v1::calcResidual() {
 	dtf_t zResid[7];
 
 	for (i = 0; i < 7; i++) {
-
 		if (layerPopulation_[i] > 0) {
-
 			phiResid[i] = dtf_t(LRParameter_.phiT + dtf_t(LRParameter_.qOverPt * layerPos_[i].Phi));
 			zResid[i] = dtf_t(LRParameter_.zT + dtf_t(LRParameter_.cotT * layerPos_[i].Z));
 
 		} else {
-
 			phiResid[i] = 0;
 			zResid[i] = 0;
 		}
 	}
 
-	for(i = 0; i < 12; i++) {
+	for (i = 0; i < 12; i++) {
 	    residuals_[i].phi = 0;
         residuals_[i].z = 0;
         residuals_[i].stubId = 0;
@@ -272,20 +288,20 @@ void LRHLS_v1::calcResidual() {
         residuals_[i].valid = false;
 	}
 
-	for(i = 0; i < 12 ; i++) {
+	for (i = 0; i < 12 ; i++) {
 
-        StubHLS stub = stubs_[i];
+        LRStub stub = stubs_[i];
 
-		if(stub.validHLS()) {
+		if (stub.valid) {
 
             residData residual;
 
             for (j = 0; j < 7; j++) {
 
-                if (stub.layerIdHLS() == j) {
+                if (stub.layerId == j) {
 
-                    residual.phi = abs_t(stub.phiHLS() - phiResid[j]);
-                    residual.z = abs_t(stub.zHLS() - zResid[j]);
+                    residual.phi = abs_t(stub.phi - phiResid[j]);
+                    residual.z = abs_t(stub.z - zResid[j]);
                     residual.stubId = i;
                     residual.layerId = j;
                     residual.valid = true;
@@ -294,15 +310,6 @@ void LRHLS_v1::calcResidual() {
             }
         }
 	}
-
-//	for(i = 0; i < 7; i++) {
-//		for(j = 0; j < 12; j++) {
-//			if(residuals_[j].layerId == i) {
-//				std::cout << residuals_[j].valid << " , ";
-//			}
-//		}
-//		std::cout << std::endl;
-//	}
 
 }
 
@@ -316,9 +323,9 @@ void LRHLS_v1::findLargestResid() {
     largestResid_.layerId = 0;
     largestResid_.valid = false;
 
-    for(i = 0; i < 12; i++) {
+    for (i = 0; i < 12; i++) {
 
-        if(residuals_[i].valid) {
+        if (residuals_[i].valid) {
 
             if (residuals_[i].combined() > largestResid_.combined()) {
                 largestResid_ = residuals_[i];
@@ -329,21 +336,12 @@ void LRHLS_v1::findLargestResid() {
 
 void LRHLS_v1::killLargestResid() {
 
-//    for(i = 0; i < 7; i++) {
-//        if(layerPopulation_[i] >= 1) {
-//            if (largestResid_.layerId == i) {
-//                stubs_[largestResid_.stubId].valid = false;
-//                layerPopulation_[largestResid_.layerId]--;
-//                nStubs_--;
-//
-//            } else {
-//                continue;
-//            }
-//        }
-//    }
-
-    stubs_[largestResid_.stubId].validHLS_ = false;
+	stubs_[largestResid_.stubId].valid = false;
     layerPopulation_[largestResid_.layerId]--;
+
+    if(layerPopulation_[largestResid_.layerId] == 0)
+    	nLayers_--;
+
     nStubs_--;
 }
 
@@ -351,42 +349,51 @@ void LRHLS_v1::returnTrack() {
 
 	int i;
 
-	trackOut_->qOverPtHLS_ = trackIn_->qOverPtHLS_;
-	trackOut_->phiHLS_ = trackIn_->phiHLS_;
-	trackOut_->cotHLS_ = trackIn_->cotHLS_;
-	trackOut_->zHLS_ = trackIn_->zHLS_;
-	trackOut_->validHLS_ = true;
+	trackOut_->qOverPt_ = trackIn_->qOverPt();
+	trackOut_->phi_ = trackIn_->phi();
+	trackOut_->cot_ = trackIn_->cot();
+	trackOut_->z_ = trackIn_->z();
+	trackOut_->valid_ = trackIn_->valid();
 
-	for(i = 0; i < 12; i++) {
-		trackOut_->stubsHLS_[i].rHLS_ = trackIn_->stubsHLS_[i].rHLS();
-		trackOut_->stubsHLS_[i].phiHLS_ = trackIn_->stubsHLS_[i].phiHLS();
-		trackOut_->stubsHLS_[i].zHLS_ = trackIn_->stubsHLS_[i].zHLS();
-		trackOut_->stubsHLS_[i].layerIdHLS_ = trackIn_->stubsHLS_[i].layerIdHLS();
-		trackOut_->stubsHLS_[i].psModuleHLS_ = trackIn_->stubsHLS_[i].psModuleHLS();
-		trackOut_->stubsHLS_[i].barrelHLS_ = trackIn_->stubsHLS_[i].barrelHLS();
-		trackOut_->stubsHLS_[i].validHLS_ = trackIn_->stubsHLS_[i].validHLS();
-	}
+	for (i = 0; i < 12; i++)
+		trackOut_->stubs_[i] = trackIn_->stubs_[i];
+
+#ifndef __SYNTHESIS__
+    std::cout << " rejected" << std::endl;
+#endif
+
 }
 
 void LRHLS_v1::createTrack() {
 
 	int i;
 
-	trackOut_->qOverPtHLS_ = LRParameter_.qOverPt;
-	trackOut_->phiHLS_ = LRParameter_.phiT;
-	trackOut_->cotHLS_ = LRParameter_.cotT;
-	trackOut_->zHLS_ = LRParameter_.zT;
-	trackOut_->validHLS_ = true;
+	trackOut_->qOverPt_ = LRParameter_.qOverPt;
+	trackOut_->phi_ = LRParameter_.phiT;
+	trackOut_->cot_ = LRParameter_.cotT;
+	trackOut_->z_ = LRParameter_.zT;
+	trackOut_->valid_ = trackIn_->valid();
 
-	for(i = 0; i < 12; i++) {
-        trackOut_->stubsHLS_[i].rHLS_ = stubs_[i].rHLS();
-        trackOut_->stubsHLS_[i].phiHLS_ = stubs_[i].phiHLS();
-        trackOut_->stubsHLS_[i].zHLS_ = stubs_[i].zHLS();
-        trackOut_->stubsHLS_[i].layerIdHLS_ = stubs_[i].layerIdHLS();
-        trackOut_->stubsHLS_[i].psModuleHLS_ = stubs_[i].psModuleHLS();
-        trackOut_->stubsHLS_[i].barrelHLS_ = stubs_[i].barrelHLS();
-        trackOut_->stubsHLS_[i].validHLS_ = stubs_[i].validHLS();
-    }
+	for (i = 0; i < 12; i++) {
+        trackOut_->stubs_[i].r_ = stubs_[i].r;
+        trackOut_->stubs_[i].phi_ = stubs_[i].phi;
+        trackOut_->stubs_[i].z_ = stubs_[i].z;
+        trackOut_->stubs_[i].layerId_ = stubs_[i].layerId;
+        trackOut_->stubs_[i].valid_ = stubs_[i].valid;
+	}
+
+#ifndef __SYNTHESIS__
+    std::cout << " accepted" << std::endl;
+    std::cout << "qOverPt : " << trackOut_->qOverPt() << std::endl;
+    std::cout << "phi : " << trackOut_->phi() << std::endl;
+    std::cout << "cot : " << trackOut_->cot() << std::endl;
+    std::cout << "z : " << trackOut_->z() << std::endl;
+
+    for(i = 0; i < 12; i++)
+        if(trackOut_->stubs_[i].valid())
+            std::cout << "layer : " << trackOut_->stubs_[i].layerId() << std::endl;
+#endif
+
 }
 
 #ifdef CMSSW_GIT_HASH

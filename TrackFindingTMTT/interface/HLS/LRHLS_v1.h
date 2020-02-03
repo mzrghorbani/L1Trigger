@@ -44,12 +44,12 @@ public:
 
     TrackHLS *trackIn_;
     TrackHLS *trackOut_;
-    StubHLS stubs_[12];
+    LRTrack LRParameter_;
+    LRStub stubs_[12];
     stubData layerPos_[7];
     residData residuals_[12];
     residData largestResid_;
     uint3_t layerPopulation_[7];
-    LRParameter LRParameter_;
     uint3_t nLayers_;
     uint4_t nStubs_;
     bool valid_;

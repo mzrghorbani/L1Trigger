@@ -28,16 +28,16 @@ enum {
     B14 = 14, B13 = 13, B4 = 4, B3 = 3, B1 = 1
 };
 enum {
-    WB = 18, IB = 15, FB = WB - IB
+    WB = 18, IB = 14, FB = WB - IB
 };
 
 // Fixed-point variables used in HW
-//typedef ap_uint<B1> uint1_t;
-//typedef ap_uint<B3> uint3_t;
-//typedef ap_uint<B4> uint4_t;
-//typedef ap_int<B13> int13_t;
-//typedef ap_int<B14> int14_t;
-//typedef ap_fixed<WB,IB> dtf_t;
+typedef ap_uint<B1> uint1_t;
+typedef ap_uint<B3> uint3_t;
+typedef ap_uint<B4> uint4_t;
+typedef ap_int<B13> int13_t;
+typedef ap_int<B14> int14_t;
+typedef ap_fixed<WB,IB> dtf_t;
 
 // Fixed-point variables used in SW
 //typedef ap_uint<B1> uint1_t;
@@ -48,12 +48,12 @@ enum {
 //typedef ap_fixed<WB,IB> dtf_t;
 
 // Fixed-point variables used in Tests
-typedef float int13_t;
-typedef float int14_t;
-typedef int uint4_t;
-typedef int uint3_t;
-typedef bool uint1_t;
-typedef float dtf_t;
+//typedef float int13_t;
+//typedef float int14_t;
+//typedef int uint4_t;
+//typedef int uint3_t;
+//typedef bool uint1_t;
+//typedef float dtf_t;
 
 template<typename T>
 T abs_t(const T &a) {
@@ -80,9 +80,7 @@ template<typename T1, typename T2>
 struct pair_t {
     T1 first;
     T2 second;
-
     pair_t() : first(0), second(0) {}
-
     pair_t(const T1 &a, const T2 &b) : first(a), second(b) {}
 };
 
@@ -93,9 +91,8 @@ pair_t<T1, T2> make_pair_t(const T1 &a, const T2 &b) {
 
 template<typename T>
 struct array_t {
-
     int size_;
-    T data_[250];
+    T data_[12];
     array_t() : size_(0) {}
     void push_back(const T &value) { data_[size_++] = value; }
     T &operator[](const int &idx) { return data_[idx]; }
@@ -108,14 +105,19 @@ struct array_t {
     void clear() { size_ = 0; }
 };
 
-struct LRParameter {
+struct LRStub {
+	int13_t r = 0;
+	int14_t phi = 0;
+	int14_t z = 0;
+	uint3_t layerId = 0;
+	bool valid = false;
+};
+
+struct LRTrack {
     dtf_t qOverPt = 0;
     dtf_t phiT = 0;
     dtf_t cotT = 0;
     dtf_t zT = 0;
-
-    explicit LRParameter(const dtf_t &qOverPt = 0, const dtf_t &phiT = 0, const dtf_t &cotT = 0, const dtf_t &zT = 0) :
-    		qOverPt(qOverPt), phiT(phiT), cotT(cotT), zT(zT) {}
 };
 
 struct stubData {
@@ -123,9 +125,6 @@ struct stubData {
     dtf_t Phi = 0;
     dtf_t RZ = 0;
     dtf_t Z = 0;
-
-    explicit stubData(const dtf_t &RPhi = 0, const dtf_t &Phi = 0, const dtf_t &RZ = 0, const dtf_t &Z = 0) :
-            RPhi(RPhi), Phi(Phi), RZ(RZ), Z(Z) {}
 
     stubData &operator<=(const stubData &a) {
         RPhi = min_t(RPhi, a.RPhi);
@@ -143,8 +142,12 @@ struct stubData {
         return *this;
     }
 
-    stubData operator+(const stubData &a) const {
-        return stubData(RPhi + a.RPhi, Phi + a.Phi, RZ + a.RZ, Z + a.Z);
+    stubData operator+(const stubData &a) {
+    	RPhi += a.RPhi;
+    	Phi += a.Phi;
+    	RZ += a.RZ;
+    	Z += a.Z;
+        return *this;
     }
 
     stubData &operator/=(const dtf_t &a) {
@@ -162,9 +165,6 @@ struct sumData {
     dtf_t x = 0;
     dtf_t y = 0;
     dtf_t xx = 0;
-
-    explicit sumData(const dtf_t &n = 0, const dtf_t &xy = 0, const dtf_t &x = 0, const dtf_t &y = 0,
-                     const dtf_t &xx = 0) : n(n), xy(xy), x(x), y(y), xx(xx) {}
 
     sumData &operator+=(const sumData &stub) {
         n++;
@@ -198,10 +198,6 @@ struct residData {
     uint3_t layerId = 0;
     uint4_t stubId = 0;
     uint1_t valid = false;
-
-    explicit residData(const dtf_t &phi = 0, const dtf_t &z = 0, const uint3_t &layerId = 0,
-                       const uint4_t &stubId = 0, const uint1_t &valid = 0) :
-            phi(phi), z(z), layerId(layerId), stubId(stubId), valid(valid) {}
 
     dtf_t combined() const {
         return (phi + z);
