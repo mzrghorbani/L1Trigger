@@ -41,7 +41,7 @@ Histos::Histos(const Settings *settings, Data *data) :
     bookLRHLS();
     bookDR();
 
-    numTPs_.reserve(6);
+    numTPs_.reserve(8);
     numTPs_["Tracker"] = 0;
     numTPs_["DTC"] = 0;
     numTPs_["GP"] = 0;
@@ -325,15 +325,15 @@ void Histos::bookLR() {
     profLR_->GetXaxis()->SetBinLabel(3, "Tracks");
     profLR_->GetXaxis()->SetBinLabel(4, "TPs");
 
-//    hisLRsize_ = inputDir.make<TH1F>("size", "Track: 'size'", 100, 0, 250);
-//    hisLRqOverPt_ = inputDir.make<TH1F>("qOverPt", "Track: 'q/Pt'", 36, -1./3., 1./3.);
-//    hisLRphi_ = inputDir.make<TH1F>("phi", "Track: 'phi'", 1000, -6, 6);
-//    hisLRz_ = inputDir.make<TH1F>("z", "Track: 'z'", 10000, -600, 600);
-//    hisLRcot_ = inputDir.make<TH1F>("cot", "Track: 'cot'", 1000, -6, 6);
-//    hisLRchi2_ = inputDir.make<TH1F>("chi2", "Track: 'chi2'", 1000, -3, 3);
+    LRsize_ = inputDir.make<TH1F>("size", "Track: 'size'", 100, 0, 250);
+    LRqOverPt_ = inputDir.make<TH1F>("qOverPt", "Track: 'q/Pt'", 36, -1./3., 1./3.);
+    LRphi_ = inputDir.make<TH1F>("phi", "Track: 'phi'", 1000, -6, 6);
+    LRz_ = inputDir.make<TH1F>("z", "Track: 'z'", 10000, -600, 600);
+    LRcot_ = inputDir.make<TH1F>("cot", "Track: 'cot'", 1000, -6, 6);
+    LRchi2_ = inputDir.make<TH1F>("chi2", "Track: 'chi2'", 1000, -3, 3);
 
-//    hisLRqOverPtRes_ = inputDir.make<TH1F>("qOverPtRes", "; Track: 'q/Pt' minus TP: 'q/Pt'", 36, -1. / 3., 1. / 3.);
-//    mazLR_ = inputDir.make<TH2F>("maz", "tp->qOverPt(), track->binPt() + .5", 100, -1. / 3., 1. / 3., 36, -18, 18);
+    LRqOverPtRes_ = inputDir.make<TH1F>("qOverPtRes", "; Track: 'q/Pt' minus TP: 'q/Pt'", 36, -1. / 3., 1. / 3.);
+    LR_ = inputDir.make<TH2F>("LR", "tp->qOverPt(), track->binPt() + .5", 100, -1. / 3., 1. / 3., 36, -18, 18);
 
 }
 
@@ -348,26 +348,30 @@ void Histos::fillLR() {
 
     nTracks = tracks.size();
     TPs tps;
+
     for (const Track *track : tracks) {
         nStubs += track->size();
-//        hisLRsize_->Fill(track->size());
-//        hisLRqOverPt_->Fill(track->qOverPt());
-//        hisLRphi_->Fill(track->phi());
-//        hisLRz_->Fill(track->z());
-//        hisLRcot_->Fill(track->cot());
-//        hisLRchi2_->Fill(track->chi2());
+        LRsize_->Fill(track->size());
+        LRqOverPt_->Fill(track->qOverPt());
+        LRphi_->Fill(track->phi());
+        LRz_->Fill(track->z());
+        LRcot_->Fill(track->cot());
+        LRchi2_->Fill(track->chi2());
+
         for (TP *tp : track->tps()) {
             if (tp->useForAlgEff()) {
                 tps.push_back(tp);
-//                hisLRqOverPtRes_->Fill(tp->qOverPt() - track->qOverPt());
-//                mazLR_->Fill(tp->qOverPt(), track->binPt() + .5);
+                LRqOverPtRes_->Fill(tp->qOverPt() - track->qOverPt());
+                LR_->Fill(tp->qOverPt(), track->binPt() + .5);
             }
         }
     }
+
     sort(tps.begin(), tps.end());
     tps.erase(unique(tps.begin(), tps.end()), tps.end());
     nTPs = tps.size();
 
+    cout << nStubs << " " << nGaps << " " << nTracks << " " << nTPs << endl;
     profLR_->Fill(1, nStubs);
     profLR_->Fill(2, nGaps);
     profLR_->Fill(3, nTracks);
@@ -386,12 +390,15 @@ void Histos::bookLRHLS() {
     profLRHLS_->GetXaxis()->SetBinLabel(3, "Tracks");
     profLRHLS_->GetXaxis()->SetBinLabel(4, "TPs");
 
-//    hisLRsize_ = inputDir.make<TH1F>("size", "Track: 'size'", 100, 0, 250);
-//    hisLRqOverPt_ = inputDir.make<TH1F>("qOverPt", "Track: 'q/Pt'", 36, -1./3., 1./3.);
-//    hisLRphi_ = inputDir.make<TH1F>("phi", "Track: 'phi'", 1000, -6, 6);
-//    hisLRz_ = inputDir.make<TH1F>("z", "Track: 'z'", 10000, -600, 600);
-//    hisLRcot_ = inputDir.make<TH1F>("cot", "Track: 'cot'", 1000, -6, 6);
-//    hisLRchi2_ = inputDir.make<TH1F>("chi2", "Track: 'chi2'", 1000, -3, 3);
+    LRHLSsize_ = inputDir.make<TH1F>("size", "Track: 'size'", 100, 0, 250);
+    LRHLSqOverPt_ = inputDir.make<TH1F>("qOverPt", "Track: 'q/Pt'", 36, -1./3., 1./3.);
+    LRHLSphi_ = inputDir.make<TH1F>("phi", "Track: 'phi'", 1000, -6, 6);
+    LRHLSz_ = inputDir.make<TH1F>("z", "Track: 'z'", 10000, -600, 600);
+    LRHLScot_ = inputDir.make<TH1F>("cot", "Track: 'cot'", 1000, -6, 6);
+    LRHLSchi2_ = inputDir.make<TH1F>("chi2", "Track: 'chi2'", 1000, -3, 3);
+
+    LRHLSqOverPtRes_ = inputDir.make<TH1F>("qOverPtRes", "; Track: 'q/Pt' minus TP: 'q/Pt'", 36, -1. / 3., 1. / 3.);
+    LRHLS_ = inputDir.make<TH2F>("LR", "tp->qOverPt(), track->binPt() + .5", 100, -1. / 3., 1. / 3., 36, -18, 18);
 
 }
 
@@ -405,22 +412,25 @@ void Histos::fillLRHLS() {
     int nTPs(0);
 
     nTracks = tracks.size();
-
     TPs tps;
-    for (const Track *track_LR : tracks) {
-        nStubs += (track_LR->size() + 1);
-//        hisLRsize_->Fill(track_LR->size());
-//        hisLRqOverPt_->Fill(track_LR->qOverPt());
-//        hisLRphi_->Fill(track_LR->phi());
-//        hisLRz_->Fill(track_LR->z());
-//        hisLRcot_->Fill(track_LR->cot());
-//        hisLRchi2_->Fill(track_LR->chi2());
+
+    for (const Track *track : tracks) {
+        nStubs += (track->size() + 1);
+        LRHLSsize_->Fill(track->size());
+        LRHLSqOverPt_->Fill(track->qOverPt());
+        LRHLSphi_->Fill(track->phi());
+        LRHLSz_->Fill(track->z());
+        LRHLScot_->Fill(track->cot());
+//        LRHLSchi2_->Fill(track->chi2());
+        LRHLSchi2_->Fill(track->cot());
     }
 
     for (const Track *track_MHT : data_->tracksMHT()) {
         for (TP *tp : track_MHT->tps()) {
             if (tp->useForAlgEff()) {
                 tps.push_back(tp);
+                LRHLSqOverPtRes_->Fill(tp->qOverPt() - track_MHT->qOverPt());
+                LRHLS_->Fill(tp->qOverPt(), track_MHT->binPt() + .5);
             }
         }
     }
@@ -428,7 +438,6 @@ void Histos::fillLRHLS() {
     sort(tps.begin(), tps.end());
     tps.erase(unique(tps.begin(), tps.end()), tps.end());
     nTPs = tps.size();
-
 
     cout << nStubs << " " << nGaps << " " << nTracks << " " << nTPs << endl;
     profLRHLS_->Fill(1, nStubs);

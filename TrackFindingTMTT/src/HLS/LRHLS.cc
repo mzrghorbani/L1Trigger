@@ -16,10 +16,8 @@ void LRHLS::produce() {
     auto *dataHLS = new DataHLS();
 
     int i = 0;
-    int j = 0;
 
     for (auto trackMHT : data_->tracksMHT()) {
-
         TrackHLS trackMHTHLS;
         trackMHTHLS.qOverPtHLS_ = trackMHT->qOverPt();
         trackMHTHLS.phiHLS_ = trackMHT->phi();
@@ -29,7 +27,6 @@ void LRHLS::produce() {
         dataHLS->tracksMHTHLS_.push_back(trackMHTHLS);
 
         for (auto stubMHT : trackMHT->stubs()) {
-
             StubHLS stubMHTHLS;
             stubMHTHLS.rHLS_ = stubMHT->r();
             stubMHTHLS.phiHLS_ = stubMHT->phi();
@@ -45,21 +42,34 @@ void LRHLS::produce() {
 
     TMTT::HLS::LRHLS_top(dataHLS);
 
-    for(auto trackMHT : data_->tracksMHT()) {
-        data_->tracksLRHLS_.push_back(trackMHT);
-    }
-
-
     i = 0;
-    for(auto trackLR : data_->tracksLRHLS()) {
-        trackLR->valid_ = dataHLS->tracksLRHLS()[i].validHLS();
-        j = 0;
 
-        for(auto stubLR : trackLR->stubs()) {
-            stubLR->valid_ = dataHLS->tracksLRHLS()[i].stubsHLS()[j].validHLS();
-            j++;
+    for(auto trackLRHLS : dataHLS->tracksLRHLS()) {
+        
+        if(trackLRHLS.validHLS()) {
+
+            Track *trackLR = new Track();
+            trackLR->qOverPt_ = trackLRHLS.qOverPtHLS();
+            trackLR->phi_ = trackLRHLS.phiHLS();
+            trackLR->cot_ = trackLRHLS.cotHLS();
+            trackLR->z_ = trackLRHLS.zHLS();
+            trackLR->valid_ = trackLRHLS.validHLS();
+            data_->tracksLRHLS_.push_back(trackLR);
+
+            for(auto stubLRHLS : trackLRHLS.stubsHLS()) {
+
+                if(stubLRHLS.validHLS()) {
+
+                    Stub *stubLR = new Stub();
+                    stubLR->r_ = stubLRHLS.rHLS();
+                    stubLR->phi_ = stubLRHLS.phiHLS();
+                    stubLR->z_ = stubLRHLS.zHLS();
+                    stubLR->valid_ = stubLRHLS.validHLS();
+                    data_->tracksLRHLS_[i]->stubs_.push_back(stubLR);
+                }
+            }
+            i++;
         }
-        i++;
     }
 
 }

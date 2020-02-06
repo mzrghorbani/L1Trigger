@@ -36,7 +36,7 @@ void LRHLS_v0::produce() {
 
     const array_t<TrackHLS> &tracks = dataHLS_->tracksMHTHLS();
 
-    for (const auto& track : tracks ) {
+    for (const auto& track : tracks) {
         trackIn_ = track;
         initFit();
         valid_ = checkValidity();
@@ -133,9 +133,10 @@ bool LRHLS_v0::checkValidity() {
 
     bool valid = true;
 
-    if (nLayers_ < 4)
+    if (nLayers_ < 5)
         valid = false;
-    if (nLayersPS_ < 2)
+
+    if (nLayersPS_ < 3)
         valid = false;
 
     return valid;
@@ -347,12 +348,15 @@ bool LRHLS_v0::killLargestResidual() {
 
     findLargestResidual();
 
-    if(nStubs_ <= 3) {
+    if(nStubs_ < 3)
         return true;
-    }
 
     trackIn_.stubsHLS_[largestResid_.stubId].validHLS_ = false;
     layerPopulation_[largestResid_.layerId]--;
+
+    if(layerPopulation_[largestResid_.layerId] == 0)
+        nLayers_--;
+
     nStubs_--;
 
     return false;
@@ -394,16 +398,15 @@ void LRHLS_v0::findLargestResidual() {
 
 void LRHLS_v0::create() {
 
-    trackOut_ = trackIn_;
-
     trackOut_.qOverPtHLS_ = LRParameter_.qOverPt;
     trackOut_.phiHLS_ = LRParameter_.phiT;
     trackOut_.cotHLS_ = LRParameter_.cotTheta;
     trackOut_.zHLS_ = LRParameter_.zT;
+    trackOut_.validHLS_ = trackIn_.validHLS();
 
     int i = 0;
 
-    for (const auto& stub : trackOut_.stubsHLS()) {
+    for (const auto& stub : trackIn_.stubsHLS()) {
         trackOut_.stubsHLS_[i].rHLS_ = stub.rHLS();
         trackOut_.stubsHLS_[i].phiHLS_ = stub.phiHLS();
         trackOut_.stubsHLS_[i].zHLS_ = stub.zHLS();

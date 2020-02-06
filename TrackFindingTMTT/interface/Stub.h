@@ -19,6 +19,8 @@ class Stub {
 
 public:
 
+    Stub();
+
     Stub(const Settings *settings, Module *module, const TTStubRef &ttStubRef);
     ~Stub() {}
 

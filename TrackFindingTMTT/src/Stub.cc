@@ -7,6 +7,8 @@ using namespace std;
 
 namespace TMTT {
 
+Stub::Stub() {}
+
 Stub::Stub( const Settings* settings, Module* module, const TTStubRef& ttStubRef ) : settings_( settings ), module_( module ), ttStubRef_( ttStubRef ) {
 
   const bool& barrel   = module->barrel();
