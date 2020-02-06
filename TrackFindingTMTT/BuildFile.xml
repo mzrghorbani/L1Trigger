@@ -20,7 +20,7 @@
 <use name="boost"/>
 <use name="roothistmatrix"/>
         <!-- Add no-misleading-indentation option to avoid warnings about bug in Boost library. -->
-<flags CXXFLAGS="-g -Wno-unused-variable -Wno-misleading-indentation -Wno-maybe-uninitialized"/>
+<flags CXXFLAGS="-g -Wno-unused-variable -Wno-misleading-indentation -Wno-maybe-uninitialized -Wno-parentheses"/>
         <!--- Suppress warnings from HLS library -->
 <flags CXXFLAGS="-Wno-int-in-bool-context"/>
 

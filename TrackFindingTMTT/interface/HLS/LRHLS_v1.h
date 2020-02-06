@@ -10,9 +10,11 @@ Created by Maziar Ghorbani - Brunel University on 12/06/19.
 #include "L1Trigger/TrackFindingTMTT/interface/HLS/TrackHLS.h"
 #include "L1Trigger/TrackFindingTMTT/interface/HLS/StubHLS.h"
 #else
+
 #include "LRHLS_types.h"
 #include "TrackHLS.h"
 #include "StubHLS.h"
+
 #endif
 
 #ifdef CMSSW_GIT_HASH
@@ -28,7 +30,7 @@ public:
 
     LRHLS_v1(TrackHLS *trackIn, TrackHLS *trackOut);
 
-    ~LRHLS_v1(){}
+    ~LRHLS_v1() {}
 
     void produce();
     void initFit();
@@ -36,7 +38,7 @@ public:
     void calcHelix();
     void calcResidual();
     void findLargestResid();
-    void killLargestResid();
+    bool killLargestResid();
     void returnTrack();
     void createTrack();
 

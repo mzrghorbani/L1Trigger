@@ -111,7 +111,6 @@ private:
 
     TProfile *profTracker_;
     TProfile *profDTC_;
-
     TProfile *profGP_;
     TProfile *profHT_;
     TProfile *profMHT_;
@@ -131,14 +130,23 @@ private:
     TH1F *hisTPinvPtHT_;
     TH1F *hisTPinvPtMHT_;
 
-    /*TH1F *hisLRsize_;
-    TH1F *hisLRqOverPt_;
-    TH1F *hisLRphi_;
-    TH1F *hisLRz_;
-    TH1F *hisLRcot_;
-    TH1F *hisLRchi2_;
-    TH1F *hisLRqOverPtRes_;
-    TH2F *mazLR_;*/
+    TH1F *LRsize_;
+    TH1F *LRqOverPt_;
+    TH1F *LRphi_;
+    TH1F *LRz_;
+    TH1F *LRcot_;
+    TH1F *LRchi2_;
+    TH1F *LRqOverPtRes_;
+    TH2F *LR_;
+
+    TH1F *LRHLSsize_;
+    TH1F *LRHLSqOverPt_;
+    TH1F *LRHLSphi_;
+    TH1F *LRHLSz_;
+    TH1F *LRHLScot_;
+    TH1F *LRHLSchi2_;
+    TH1F *LRHLSqOverPtRes_;
+    TH2F *LRHLS_;
 
 };
 

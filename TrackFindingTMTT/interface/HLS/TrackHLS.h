@@ -30,6 +30,7 @@ public:
 
 //    const array_s<Stub> &stubs() const;
     const StubHLS *stubs() const;
+    uint4_t size() const;
     dtf_t qOverPt() const;
     dtf_t phi() const;
     dtf_t cot() const;
@@ -40,6 +41,7 @@ public:
 
 //array_s<Stub> stubs_;
 StubHLS stubs_[12];
+uint4_t size_;
 dtf_t qOverPt_;
 dtf_t phi_;
 dtf_t cot_;

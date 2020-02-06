@@ -19,6 +19,8 @@ class Stub {
 
 public:
 
+    Stub();
+
     Stub(const Settings *settings, Module *module, const TTStubRef &ttStubRef);
     ~Stub() {}
 
@@ -91,6 +93,7 @@ public:
     double phi_;
     double z_;
     bool valid_;
+    int layerId_;
 
     Range rangePt_;
     Range rangePhi_;
