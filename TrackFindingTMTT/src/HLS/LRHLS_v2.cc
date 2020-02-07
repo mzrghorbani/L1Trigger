@@ -3,7 +3,7 @@ Created by Maziar Ghorbani - Brunel University on 12/06/19.
 */
 
 #ifdef CMSSW_GIT_HASH
-#include "L1Trigger/TrackFindingTMTT/interface//LRHLS_v2.h"
+#include "L1Trigger/TrackFindingTMTT/interface/HLS/LRHLS_v2.h"
 #else
 #include "LRHLS_v2.h"
 #endif
@@ -247,17 +247,17 @@ void LRHLS_v2::calcResidual() {
     dtf_t phiResid[7];
     dtf_t zResid[7];
 
-    for(i = 0; i < 7; i++) {
-        phiResid[i] = 0;
-        zResid[i] = 0;
-    }
-
     for (i = 0; i < 7; i++) {
 
         if (layerPopulation_[i] > 0) {
 
             phiResid[i] = dtf_t(LRParameter_.phiT + dtf_t(LRParameter_.qOverPt * layerPos_[i].Phi));
             zResid[i] = dtf_t(LRParameter_.zT + dtf_t(LRParameter_.cotT * layerPos_[i].Z));
+
+        } else {
+
+            phiResid[i] = 0;
+            zResid[i] = 0;
         }
     }
 
@@ -273,8 +273,8 @@ void LRHLS_v2::calcResidual() {
 
                 if(stub.layerId == j) {
 
-                    residual.phi = stub.phi - abs_t(phiResid[j]);
-                    residual.z = stub.z - abs_t(zResid[j]);
+                    residual.phi = abs_t(stub.phi - phiResid[j]);
+                    residual.z = abs_t(stub.z - zResid[j]);
                     residual.valid = stub.valid;
                     residual.keep = false;
                     residual.stubId = i;
@@ -369,6 +369,7 @@ void LRHLS_v2::returnTrack() {
 
     int i;
 
+    trackOut_->size_ = trackIn_->size();
     trackOut_->qOverPt_ = trackIn_->qOverPt_;
     trackOut_->phi_ = trackIn_->phi_;
     trackOut_->cot_ = trackIn_->cot_;
@@ -376,11 +377,14 @@ void LRHLS_v2::returnTrack() {
     trackOut_->valid_ = trackIn_->valid_;
 
     for(i = 0; i < 12; i++) {
-        trackOut_->stubs_[i].r_ = trackIn_->stubs_[i].r();
-        trackOut_->stubs_[i].phi_ = trackIn_->stubs_[i].phi();
-        trackOut_->stubs_[i].z_ = trackIn_->stubs_[i].z();
-        trackOut_->stubs_[i].layerId_ = trackIn_->stubs_[i].layerId();
-        trackOut_->stubs_[i].valid_ = trackIn_->stubs_[i].valid();
+        if(trackIn_->stubs_[i].valid()) {
+
+            trackOut_->stubs_[i].r_ = trackIn_->stubs_[i].r();
+            trackOut_->stubs_[i].phi_ = trackIn_->stubs_[i].phi();
+            trackOut_->stubs_[i].z_ = trackIn_->stubs_[i].z();
+            trackOut_->stubs_[i].layerId_ = trackIn_->stubs_[i].layerId();
+            trackOut_->stubs_[i].valid_ = trackIn_->stubs_[i].valid();
+        }
     }
 }
 
@@ -388,6 +392,7 @@ void LRHLS_v2::createTrack() {
 
     int i;
 
+    trackOut_->size_ = nStubs_;
     trackOut_->qOverPt_ = LRParameter_.qOverPt;
     trackOut_->phi_ = LRParameter_.phiT;
     trackOut_->cot_ = LRParameter_.cotT;

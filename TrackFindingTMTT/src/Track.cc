@@ -10,6 +10,8 @@ using namespace std;
 
 namespace TMTT {
 
+Track::Track() {}
+
 Track::Track(const Settings *settings, const int &htCell, const Stubs &stubs, const int &pos) :
         settings_(settings), parent_(nullptr), stubs_(stubs) {
 

@@ -14,11 +14,15 @@ namespace TMTT {
 namespace HLS {
 #endif
 
-TrackHLS::TrackHLS() : qOverPt_(0), phi_(0), cot_(0), z_(0), valid_(false) {}
+TrackHLS::TrackHLS() : size_(0), qOverPt_(0), phi_(0), cot_(0), z_(0), valid_(false) {}
 
 //const array_s<Stub> &Track::stubs() const {
 //    return stubs_;
 //}
+
+uint4_t TrackHLS::size() const {
+    return size_;
+}
 
 const StubHLS *TrackHLS::stubs() const {
     return stubs_;

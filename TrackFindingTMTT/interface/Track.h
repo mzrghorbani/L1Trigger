@@ -21,6 +21,8 @@ class Track {
 
 public:
 
+  Track();
+
 /*!
    Constructor used in HT.
   @param[in] settings Configuration.
