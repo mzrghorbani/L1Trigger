@@ -93,6 +93,7 @@ public:
     double phi_;
     double z_;
     bool valid_;
+    int layerId_;
 
     Range rangePt_;
     Range rangePhi_;

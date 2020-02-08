@@ -119,15 +119,13 @@ void LRHLS_v2::initFit() {
 
 bool LRHLS_v2::checkValidity() {
 
-    bool valid = true;
+    int i;
 
-    if(nLayers_ < 4)
-        valid = false;
+    for(i = 0; i < 7; i++)
+        if(layerPopulation_[i] > 1)
+            return true;
 
-    if(nStubs_ < 4)
-        valid = false;
-
-    return valid;
+    return false;
 }
 
 void LRHLS_v2::calcHelix() {
@@ -293,8 +291,8 @@ void LRHLS_v2::findLeastResid() {
     int i;
 
     for(i = 0; i < 7; i++) {
-        layerMinResid_[i].phi = 4096;
-        layerMinResid_[i].z = 4096;
+        layerMinResid_[i].phi = 8192;
+        layerMinResid_[i].z = 8192;
         layerMinResid_[i].layerId = 0;
         layerMinResid_[i].stubId = 0;
         layerMinResid_[i].valid = false;
@@ -403,11 +401,11 @@ void LRHLS_v2::createTrack() {
 
         if(residuals_[i].keep) {
 
-            trackOut_->stubs_[i].r_ = trackIn_->stubs_[i].r();
-            trackOut_->stubs_[i].phi_ = trackIn_->stubs_[i].phi();
-            trackOut_->stubs_[i].z_ = trackIn_->stubs_[i].z();
-            trackOut_->stubs_[i].layerId_ = trackIn_->stubs_[i].layerId();
-            trackOut_->stubs_[i].valid_ = trackIn_->stubs_[i].valid();
+            trackOut_->stubs_[i].r_ = stubs_[i].r;
+            trackOut_->stubs_[i].phi_ = stubs_[i].phi;
+            trackOut_->stubs_[i].z_ = stubs_[i].z;
+            trackOut_->stubs_[i].layerId_ = stubs_[i].layerId;
+            trackOut_->stubs_[i].valid_ = stubs_[i].valid;
         }
     }
 }

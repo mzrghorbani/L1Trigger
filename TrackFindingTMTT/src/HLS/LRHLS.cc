@@ -64,6 +64,7 @@ void LRHLS::produce() {
                     stubLR->r_ = trackLRHLS.stubs_[j].r();
                     stubLR->phi_ = trackLRHLS.stubs_[j].phi();
                     stubLR->z_ = trackLRHLS.stubs_[j].z();
+                    stubLR->layerId_ = trackLRHLS.stubs_[j].layerId();
                     stubLR->valid_ = trackLRHLS.stubs_[j].valid();
                     data_->tracksLRHLS_[i]->stubs_.push_back(stubLR);
                 }
