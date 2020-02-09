@@ -37,6 +37,7 @@ LRHLS_v2::LRHLS_v2(TrackHLS *trackIn, TrackHLS *trackOut) :
 void LRHLS_v2::produce() {
 
     initFit();
+
     valid_ = checkValidity();
 
     if(not valid_) {
@@ -375,15 +376,12 @@ void LRHLS_v2::returnTrack() {
     trackOut_->valid_ = trackIn_->valid_;
 
     for(i = 0; i < 12; i++) {
-        if(trackIn_->stubs_[i].valid()) {
-
-            trackOut_->stubs_[i].r_ = trackIn_->stubs_[i].r();
-            trackOut_->stubs_[i].phi_ = trackIn_->stubs_[i].phi();
-            trackOut_->stubs_[i].z_ = trackIn_->stubs_[i].z();
-            trackOut_->stubs_[i].layerId_ = trackIn_->stubs_[i].layerId();
-            trackOut_->stubs_[i].valid_ = trackIn_->stubs_[i].valid();
-        }
-    }
+		trackOut_->stubs_[i].r_ = trackIn_->stubs_[i].r();
+		trackOut_->stubs_[i].phi_ = trackIn_->stubs_[i].phi();
+		trackOut_->stubs_[i].z_ = trackIn_->stubs_[i].z();
+		trackOut_->stubs_[i].layerId_ = trackIn_->stubs_[i].layerId();
+		trackOut_->stubs_[i].valid_ = trackIn_->stubs_[i].valid();
+	}
 }
 
 void LRHLS_v2::createTrack() {
