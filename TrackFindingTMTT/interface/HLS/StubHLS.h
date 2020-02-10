@@ -25,23 +25,23 @@ public:
 
     ~StubHLS(){}
 
-    int13_t rHLS() const;
-    int14_t phiHLS() const;
-    int14_t zHLS() const;
-    uint3_t layerIdHLS() const;
-    uint1_t psModuleHLS() const;
-    uint1_t barrelHLS() const;
-    uint1_t validHLS() const;
+    int13_t r() const;
+    int14_t phi() const;
+    int14_t z() const;
+    uint3_t layerId() const;
+    uint1_t psModule() const;
+    uint1_t barrel() const;
+    uint1_t valid() const;
 
 public:
 
-    int13_t rHLS_;
-    int14_t phiHLS_;
-    int14_t zHLS_;
-    uint3_t layerIdHLS_;
-    uint1_t psModuleHLS_;
-    uint1_t barrelHLS_;
-    uint1_t validHLS_;
+    int13_t r_;
+    int14_t phi_;
+    int14_t z_;
+    uint3_t layerId_;
+    uint1_t psModule_;
+    uint1_t barrel_;
+    uint1_t valid_;
 
 };
 

@@ -14,9 +14,9 @@ namespace TMTT {
 namespace HLS {
 #endif
 
-void LRHLS_top(DataHLS *dataHLS) {
+void LRHLS_top(const SettingsHLS *settingsHLS, DataHLS *dataHLS) {
 
-    LRHLS_v0 lrhlsV0(dataHLS);
+    LRHLS_v0 lrhlsV0(settingsHLS, dataHLS);
 
     lrhlsV0.produce();
 

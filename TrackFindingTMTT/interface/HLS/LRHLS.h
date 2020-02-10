@@ -20,7 +20,7 @@ class LRHLS {
 
 public:
 
-    LRHLS(Settings *settings, Data *data);
+    LRHLS(const Settings *settings, Data *data);
 
     ~LRHLS(){}
 
@@ -28,7 +28,7 @@ public:
 
 private:
 
-    Settings *settings_;
+    const Settings *settings_;
     Data *data_;
 
 };

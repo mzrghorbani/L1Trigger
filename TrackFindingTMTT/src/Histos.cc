@@ -349,6 +349,7 @@ void Histos::fillLR() {
     nTracks = tracks.size();
     TPs tps;
 
+    int i = 0;
     for (const Track *track : tracks) {
         nStubs += track->size();
         LRsize_->Fill(track->size());

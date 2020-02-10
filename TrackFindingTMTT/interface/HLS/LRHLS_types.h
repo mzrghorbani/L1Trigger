@@ -43,7 +43,7 @@ typedef float int13_t;
 typedef float int14_t;
 typedef int uint4_t;
 typedef int uint3_t;
-typedef bool uint1_t;
+typedef int uint1_t;
 typedef float dtf_t;
 
 template<typename T>
@@ -118,12 +118,12 @@ struct LRStub {
     int14_t phi = 0;
     int14_t z = 0;
     uint4_t layerId = 0;
-    uint1_t psModule = 0;
-    uint1_t barrel = 0;
-    uint1_t valid = 0;
+    bool psModule = false;
+    bool barrel = false;
+    bool valid = false;
 
     explicit LRStub(const int13_t &r = 0, const int13_t &phi = 0, const int13_t &z = 0, const int13_t &layerId = 0,
-                    const uint1_t &psModule = 0, const uint1_t &barrel = 0, const int13_t &valid = 0) :
+                    const bool &psModule = false, const bool &barrel = false, const bool &valid = false) :
             r(r), phi(phi), z(z), layerId(layerId), valid(valid) {}
 
 };
@@ -137,6 +137,14 @@ struct LRTrack {
     explicit LRTrack(const dtf_t &qOverPt = 0, const dtf_t &phiT = 0, const dtf_t &cotTheta = 0,
                      const dtf_t &zT = 0) :
             qOverPt(qOverPt), phiT(phiT), cotTheta(cotTheta), zT(zT) {}
+
+    LRTrack& operator +=(const LRTrack& a) {
+        qOverPt += a.qOverPt;
+        phiT += a.phiT;
+        cotTheta += a.cotTheta;
+        zT += a.zT;
+        return *this;
+    }
 };
 
 struct stubData {
@@ -219,12 +227,12 @@ struct residData {
     dtf_t z = 0;
     uint3_t layerId = 0;
     uint4_t stubId = 0;
-    uint1_t ps = 0;
-    uint1_t valid = 0;
+    bool ps = false;
+    bool valid = false;
 
     explicit residData(const dtf_t &phi = 0, const dtf_t &z = 0, const uint3_t &layerId = 0,
-                       const uint4_t &stubId = 0, const uint1_t &valid = 0) :
-            phi(phi), z(z), layerId(layerId), stubId(stubId), valid(valid) {}
+                       const uint4_t &stubId = 0, const uint1_t &ps = false, const uint1_t &valid = false) :
+            phi(phi), z(z), layerId(layerId), stubId(stubId), ps(ps), valid(valid) {}
 
     dtf_t combined() const {
         return (phi + z);
