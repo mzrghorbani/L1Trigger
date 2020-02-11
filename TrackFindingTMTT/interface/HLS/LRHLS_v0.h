@@ -50,8 +50,8 @@ public:
 
 public:
 
-    const SettingsHLS *settings_;
-    DataHLS *data_;
+    const SettingsHLS *settingsHLS_;
+    DataHLS *dataHLS_;
     const uint3_t numLayers_;
     const uint3_t minLayers_;
     const uint3_t minLayersPS_;

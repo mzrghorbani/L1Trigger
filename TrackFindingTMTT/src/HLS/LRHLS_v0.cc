@@ -15,8 +15,8 @@ namespace HLS {
 #endif
 
 LRHLS_v0::LRHLS_v0(const SettingsHLS *settingsHLS, DataHLS *dataHLS) :
-    settings_ (settingsHLS),
-    data_ (dataHLS),
+    settingsHLS_(settingsHLS),
+    dataHLS_(dataHLS),
     numLayers_(settingsHLS->trackerNumLayers()),
     minLayers_(settingsHLS->lrMinLayers()),
     minLayersPS_(settingsHLS->lrMinLayersPS()),
@@ -29,7 +29,7 @@ LRHLS_v0::LRHLS_v0(const SettingsHLS *settingsHLS, DataHLS *dataHLS) :
 
 void LRHLS_v0::produce() {
 
-    const array_t<TrackHLS> &tracks = data_->tracksMHTHLS();
+    const array_t<TrackHLS> &tracks = dataHLS_->tracksMHTHLS();
 
     for (const auto &track : tracks) {
         track_ = track;
@@ -38,14 +38,14 @@ void LRHLS_v0::produce() {
             create();
             continue;
         }
-        while ( true ) {
+        while (true) {
             nIterations_++;
             calcHelix();
             calcResidual();
             bool nothingToKill = killLargestResidual();
-            if ( nothingToKill )
+            if (nothingToKill)
                 break;
-            if ( nIterations_ == maxIteartions_ )
+            if (nIterations_ == maxIteartions_)
                 break;
         }
         create();
@@ -57,9 +57,10 @@ void LRHLS_v0::initFit() {
     int i, j;
 
     nIterations_ = 0;
+    nStubs_ = 0;
     secPhi_ = track_.secPhi();
     secEta_ = track_.secEta();
-    HTParameter_ = LRTrack( track_.qOverPt(), track_.phi(), track_.cot(), track_.z() );
+    HTParameter_ = LRTrack(track_.qOverPt(), track_.phi(), track_.cot(), track_.z());
     LRParameter_ = HTParameter_;
     stubs_ = track_.stubs();
 
@@ -158,9 +159,9 @@ uint3_t LRHLS_v0::countLayers(const array_s<StubHLS> &stubs, const bool &onlySee
 
     int i = 0;
     int nLayers = 0;
-    uint1_t foundLayers[numLayers_];
+    uint1_t foundLayers[7];
 
-    for(i = 0; i < numLayers_; i++) {
+    for(i = 0; i < 7; i++) {
     	foundLayers[i] = 0;
     }
 
@@ -172,27 +173,11 @@ uint3_t LRHLS_v0::countLayers(const array_s<StubHLS> &stubs, const bool &onlySee
         }
     }
 
-    for(i = 0; i < minLayers_; i++) {
+    for(i = 0; i < 7; i++) {
         nLayers += foundLayers[i];
     }
 
     return nLayers;
-}
-
-void LRHLS_v0::create() {
-
-    array_t<TrackHLS> tracks = data_->tracksLRHLS();
-
-    if (valid_) {
-        LRParameter_ += HTParameter_;
-        TrackHLS track;
-        track.qOverPt_ = LRParameter_.qOverPt;
-        track.phi_ = LRParameter_.phiT;
-        track.cot_ = LRParameter_.cotTheta;
-        track.z_ = LRParameter_.zT;
-        track.stubs_ = stubs_;
-        tracks.push_back(track);
-    }
 }
 
 void LRHLS_v0::calcHelix() {
@@ -268,6 +253,8 @@ void LRHLS_v0::calcResidual() {
 
 bool LRHLS_v0::killLargestResidual() {
 
+	int i, j;
+
     findLargestResidual();
     valid_ = largestResid_.combined() < 2.;
     if (countStubs(stubs_) == 4) {
@@ -276,9 +263,16 @@ bool LRHLS_v0::killLargestResidual() {
     const uint3_t & layerID = largestResid_.layerId;
     const uint4_t & stubID = largestResid_.stubId;
     stubMap_[layerID][stubID].valid_ = false;
-    stubs_[stubID].valid_ = false;
+    for(auto stub : stubs_)
+    	stub.valid_ = false;
+    stubs_.clear();
+    for(i = 0; i < 7; i++)
+    	for(j = 0; j < 4; j++)
+    		if(stubMap_[i][j].valid_)
+    			stubs_.push_back(stubMap_[i][j]);
     layerPopulation_[layerID]--;
     nStubs_--;
+
     return false;
 }
 
@@ -334,6 +328,23 @@ uint4_t LRHLS_v0::countStubs(const array_s<StubHLS> &stubs, const bool &onlyPS) 
         nStubs = nStubs_;
     }
     return nStubs;
+}
+
+void LRHLS_v0::create() {
+
+    if (valid_) {
+        LRParameter_ += HTParameter_;
+        TrackHLS track;
+        track.qOverPt_ = LRParameter_.qOverPt;
+        track.phi_ = LRParameter_.phiT;
+        track.cot_ = LRParameter_.cotTheta;
+        track.z_ = LRParameter_.zT;
+        track.valid_ = track_.valid();
+        track.secPhi_ = secPhi_;
+        track.secEta_ = secEta_;
+        track.stubs_ = stubs_;
+        dataHLS_->tracksLRHLS_.push_back(track);
+    }
 }
 
 #ifdef CMSSW_GIT_HASH
