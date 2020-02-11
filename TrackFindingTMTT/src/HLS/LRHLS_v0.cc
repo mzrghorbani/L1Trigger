@@ -29,32 +29,37 @@ LRHLS_v0::LRHLS_v0(const SettingsHLS *settingsHLS, DataHLS *dataHLS) :
 
 void LRHLS_v0::produce() {
 
+	uint4_t i;
+	int j;
+
     const array_t<TrackHLS> &tracks = dataHLS_->tracksMHTHLS();
 
-    for (const auto &track : tracks) {
-        track_ = track;
-        initFit();
-        if (not valid_) {
-            create();
-            continue;
-        }
-        while (true) {
-            nIterations_++;
-            calcHelix();
-            calcResidual();
-            bool nothingToKill = killLargestResidual();
-            if (nothingToKill)
-                break;
-            if (nIterations_ == maxIteartions_)
-                break;
-        }
-        create();
+    for (i = 0; i < 2; i++) {
+    	if (tracks[i].valid()) {
+			track_ = tracks[i];
+			initFit();
+			if (not valid_) {
+				create();
+				continue;
+			}
+			for (j = 0; j < 12; j++) {
+				nIterations_++;
+				calcHelix();
+				calcResidual();
+				bool nothingToKill = killLargestResidual();
+				if (nothingToKill)
+					break;
+				if (nIterations_ == maxIteartions_)
+					break;
+			}
+			create();
+		}
     }
 }
 
 void LRHLS_v0::initFit() {
 
-    int i, j;
+    uint4_t i, j;
 
     nIterations_ = 0;
     nStubs_ = 0;
@@ -68,8 +73,8 @@ void LRHLS_v0::initFit() {
     if (not valid_)
         return;
 
-    for(i = 0; i < 7; i++) {
-        for(j = 0; j < 4; j++) {
+    for (i = 0; i < 7; i++) {
+        for (j = 0; j < 4; j++) {
             stubMap_[i][j].r_ = 0;
             stubMap_[i][j].phi_ = 0;
             stubMap_[i][j].z_ = 0;
@@ -80,7 +85,7 @@ void LRHLS_v0::initFit() {
         }
     }
 
-    for(i = 0; i < 7; i++)
+    for (i = 0; i < 7; i++)
         layerPopulation_[i] = 0;
 
     uint3_t j0 = 0;
@@ -91,8 +96,10 @@ void LRHLS_v0::initFit() {
     uint3_t j5 = 0;
     uint3_t j6 = 0;
 
-    for (auto const &stub : stubs_) {
-        if(stub.valid()) {
+    for (i = 0; i < 12; i++) {
+    	StubHLS stub = stubs_[i];
+
+        if (stub.valid()) {
             switch (stub.layerId()) {
             case 1:
                 stubMap_[1][j1] = stub;
@@ -157,43 +164,43 @@ bool LRHLS_v0::checkValidity(const array_s<StubHLS>& stubs) const {
 
 uint3_t LRHLS_v0::countLayers(const array_s<StubHLS> &stubs, const bool &onlySeed) const {
 
-    int i = 0;
-    int nLayers = 0;
+    uint4_t i;
+    uint4_t nLayers = 0;
     uint1_t foundLayers[7];
 
-    for(i = 0; i < 7; i++) {
+    for (i = 0; i < 7; i++)
     	foundLayers[i] = 0;
-    }
 
-    for (auto const &stub : stubs) {
-        if(stub.valid()) {
+    for (i = 0; i < 12; i++) {
+    	StubHLS stub = stubs_[i];
+        if (stub.valid()) {
             if (!onlySeed || stub.psModule()) {
                 foundLayers[stub.layerId()] = 1;
             }
         }
     }
 
-    for(i = 0; i < 7; i++) {
-        nLayers += foundLayers[i];
-    }
+    for (i = 0; i < 7; i++)
+    	nLayers += foundLayers[i];
 
     return nLayers;
 }
 
 void LRHLS_v0::calcHelix() {
 
-    int i, j;
+    uint4_t i, j;
 
     sumData phiSums, zSums;
 
-    for(i = 0; i < 7; i++) {
+    for (i = 0; i < 7; i++) {
         stubData layerMinPos(4096, 4096, 4096, 4096);
         stubData layerMaxPos(-4096, -4096, -4096, -4096);
         bool ps( false );
-        for(j = 0; j < 4; j++) {
-        	if(stubMap_[i][j].valid()) {
-				stubData pos(stubMap_[i][j].r(), stubMap_[i][j].phi(), stubMap_[i][j].r(), stubMap_[i][j].z());
-				if (stubMap_[i][j].psModule()) {
+        for (j = 0; j < 4; j++) {
+        	StubHLS stub = stubMap_[i][j];
+        	if (stub.valid()) {
+				stubData pos(stub.r(), stub.phi(), stub.r(), stub.z());
+				if (stub.psModule()) {
 					ps = true;
 					layerMinPos <= pos;
 					layerMaxPos >= pos;
@@ -218,10 +225,10 @@ void LRHLS_v0::calcHelix() {
 
 void LRHLS_v0::calcResidual() {
 
-    int i, j;
+    uint4_t i, j;
 
-    for(i = 0; i < 7; i++) {
-        for(j = 0; j < 4; j++) {
+    for (i = 0; i < 7; i++) {
+        for (j = 0; j < 4; j++) {
             residuals_[i][j].phi = 0;
             residuals_[i][j].z = 0;
             residuals_[i][j].stubId = 0;
@@ -231,17 +238,18 @@ void LRHLS_v0::calcResidual() {
         }
     }
 
-    for(i = 0; i < 7; i++) {
-        for(j = 0; j < 4; j++) {
-        	if(stubMap_[i][j].valid()) {
-				stubData pos(stubMap_[i][j].r(), stubMap_[i][j].phi(), stubMap_[i][j].r(), stubMap_[i][j].z());
+    for (i = 0; i < 7; i++) {
+        for (j = 0; j < 4; j++) {
+        	StubHLS stub = stubMap_[i][j];
+        	if (stub.valid()) {
+				stubData pos(stub.r(), stub.phi(), stub.r(), stub.z());
 				dtf_t zResid = pos.Z - (LRParameter_.zT + LRParameter_.cotTheta * pos.RZ);
 				dtf_t phiResid = pos.Phi - (LRParameter_.phiT + LRParameter_.qOverPt * pos.RPhi);
-				residData resid(abs_t(phiResid), abs_t(zResid), i, j, stubMap_[i][j].psModule(), true);
+				residData resid(abs_t(phiResid), abs_t(zResid), i, j, stub.psModule(), true);
 				resid.phi /= residPhi_;
-				if (!stubMap_[i][j].barrel())
+				if (!stub.barrel())
 					resid.z /= abs_t(HTParameter_.cotTheta);
-				if (stubMap_[i][j].psModule())
+				if (stub.psModule())
 					resid.z /= residZPS_;
 				else
 					resid.z /= residZ2S_;
@@ -253,7 +261,7 @@ void LRHLS_v0::calcResidual() {
 
 bool LRHLS_v0::killLargestResidual() {
 
-	int i, j;
+	uint4_t i, j;
 
     findLargestResidual();
     valid_ = largestResid_.combined() < 2.;
@@ -263,12 +271,12 @@ bool LRHLS_v0::killLargestResidual() {
     const uint3_t & layerID = largestResid_.layerId;
     const uint4_t & stubID = largestResid_.stubId;
     stubMap_[layerID][stubID].valid_ = false;
-    for(auto stub : stubs_)
-    	stub.valid_ = false;
+    for (i = 0; i < 12; i++)
+    	stubs_[i].valid_ = false;
     stubs_.clear();
-    for(i = 0; i < 7; i++)
-    	for(j = 0; j < 4; j++)
-    		if(stubMap_[i][j].valid_)
+    for (i = 0; i < 7; i++)
+    	for (j = 0; j < 4; j++)
+    		if (stubMap_[i][j].valid_)
     			stubs_.push_back(stubMap_[i][j]);
     layerPopulation_[layerID]--;
     nStubs_--;
@@ -278,7 +286,7 @@ bool LRHLS_v0::killLargestResidual() {
 
 void LRHLS_v0::findLargestResidual() {
 
-    int i, j;
+    uint4_t i, j;
 
     largestResid_.phi = -1.;
     largestResid_.z = -1.;
@@ -287,26 +295,25 @@ void LRHLS_v0::findLargestResidual() {
     largestResid_.ps = false;
     largestResid_.valid = false;
 
-    for(i = 0; i < 7; i++) {
-    	if(layerPopulation_[i] == 0) {
+    for (i = 0; i < 7; i++) {
+    	if (layerPopulation_[i] == 0)
     		continue;
-    	}
 		bool single = layerPopulation_[i] == 1;
 		bool notPurged = countStubs(stubs_, false) != countLayers(stubs_, false);
 		bool layerCritical = countLayers(stubs_, false) == minLayers_;
 		bool psCritical = countLayers(stubs_, true) == minLayersPS_;
-		if (single && notPurged && layerCritical) {
+		if (single && notPurged && layerCritical)
 			continue;
-		}
-		for(j = 0; j < 4; j++) {
-			if(residuals_[i][j].valid) {
-				if(residuals_[i][j].ps && psCritical && countStubs(stubs_) > 4) {
+		for (j = 0; j < 4; j++) {
+			residData residual = residuals_[i][j];
+			if (residual.valid) {
+				if (residual.ps && psCritical && countStubs(stubs_) > 4) {
 					if (layerPopulation_[i] == 1) {
 						continue;
 					}
 				}
-				if (residuals_[i][j].combined() > largestResid_.combined()) {
-					largestResid_ = residuals_[i][j];
+				if (residual.combined() > largestResid_.combined()) {
+					largestResid_ = residual;
 				}
 			}
 		}
@@ -315,10 +322,13 @@ void LRHLS_v0::findLargestResidual() {
 
 uint4_t LRHLS_v0::countStubs(const array_s<StubHLS> &stubs, const bool &onlyPS) const {
 
+	uint4_t i;
     uint4_t nStubs(0);
+
     if (onlyPS) {
-        for (const auto& stub : stubs) {
-            if(stub.valid()) {
+        for (i = 0; i < 12; i++) {
+        	StubHLS stub = stubs_[i];
+            if (stub.valid()) {
                 if (stub.psModule()) {
                     nStubs++;
                 }
