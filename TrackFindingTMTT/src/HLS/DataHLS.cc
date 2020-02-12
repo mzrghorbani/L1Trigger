@@ -18,21 +18,13 @@ DataHLS::DataHLS() {
 
 }
 
-const array_t<TrackHLS> &DataHLS::tracksMHTHLS() const {
+const TrackHLS *DataHLS::tracksMHTHLS() const {
     return tracksMHTHLS_;
 }
 
-const array_t<TrackHLS> &DataHLS::tracksLRHLS() const {
+const TrackHLS *DataHLS::tracksLRHLS() const {
     return tracksLRHLS_;
 }
-
-//const TrackHLS *DataHLS::tracksMHTHLS() const {
-//    return tracksMHTHLS_;
-//}
-
-//const TrackHLS *DataHLS::tracksLRHLS() const {
-//    return tracksLRHLS_;
-//}
 
 #ifdef CMSSW_GIT_HASH
 }

@@ -25,17 +25,13 @@ public:
 
     ~DataHLS(){}
 
-    const array_t<TrackHLS> &tracksMHTHLS() const;
-//    const TrackHLS *tracksMHTHLS() const;
-    const array_t<TrackHLS> &tracksLRHLS() const;
-//    const TrackHLS *tracksLRHLS() const;
+    const TrackHLS *tracksMHTHLS() const;
+    const TrackHLS *tracksLRHLS() const;
 
 public:
 
-    array_t<TrackHLS> tracksMHTHLS_;
-//    TrackHLS tracksMHTHLS_[226];
-    array_t<TrackHLS> tracksLRHLS_;
-//    TrackHLS tracksLRHLS_[226];
+    TrackHLS tracksMHTHLS_[300];
+    TrackHLS tracksLRHLS_[300];
 
 };
 
