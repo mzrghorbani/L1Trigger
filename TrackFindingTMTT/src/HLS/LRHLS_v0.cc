@@ -29,12 +29,12 @@ LRHLS_v0::LRHLS_v0(const SettingsHLS *settingsHLS, DataHLS *dataHLS) :
 
 void LRHLS_v0::produce() {
 
-	uint4_t i;
-	int j;
+	int i;
+	uint4_t j;
 
     const array_t<TrackHLS> &tracks = dataHLS_->tracksMHTHLS();
 
-    for (i = 0; i < 2; i++) {
+    for (i = 0; i < tracks.size(); i++) {
     	if (tracks[i].valid()) {
 			track_ = tracks[i];
 			initFit();
@@ -42,7 +42,7 @@ void LRHLS_v0::produce() {
 				create();
 				continue;
 			}
-			for (j = 0; j < 12; j++) {
+			for (j = 0; j < maxIteartions_; j++) {
 				nIterations_++;
 				calcHelix();
 				calcResidual();
@@ -349,9 +349,9 @@ void LRHLS_v0::create() {
         track.phi_ = LRParameter_.phiT;
         track.cot_ = LRParameter_.cotTheta;
         track.z_ = LRParameter_.zT;
-        track.valid_ = track_.valid();
         track.secPhi_ = secPhi_;
         track.secEta_ = secEta_;
+        track.valid_ = true;
         track.stubs_ = stubs_;
         dataHLS_->tracksLRHLS_.push_back(track);
     }

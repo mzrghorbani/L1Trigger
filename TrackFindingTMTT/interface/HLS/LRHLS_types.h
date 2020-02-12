@@ -27,7 +27,7 @@ enum {
     B17 = 17, B16 = 16, B14 = 14, B13 = 13, B12 = 12, B5 = 5, B4 = 4, B3 = 3, B1 = 1
 };
 enum {
-    WB = 21, IB = 17, FB = WB - IB
+    WB = 23, IB = 17, FB = WB - IB
 };
 
 // HLS variables for HW tests
@@ -39,20 +39,20 @@ enum {
 //typedef ap_fixed<WB,IB> dtf_t;
 
 // Fixed-point variables used in SW
-//typedef ap_uint<B1> uint1_t;
-//typedef ap_uint<B3> uint3_t;
-//typedef ap_uint<B4> uint4_t;
-//typedef ap_fixed<WB,IB> int13_t;
-//typedef ap_fixed<WB,IB> int14_t;
-//typedef ap_fixed<WB+WB,IB+IB> dtf_t;
+typedef ap_uint<B1> uint1_t;
+typedef ap_uint<B3> uint3_t;
+typedef ap_uint<B4> uint4_t;
+typedef ap_fixed<WB,B13> int13_t;
+typedef ap_fixed<WB,B14> int14_t;
+typedef ap_fixed<WB+WB,B13+B14> dtf_t;
 
 // HLS variables for SW tests
-typedef float int13_t;
-typedef float int14_t;
-typedef int uint4_t;
-typedef int uint3_t;
-typedef int uint1_t;
-typedef float dtf_t;
+//typedef float int13_t;
+//typedef float int14_t;
+//typedef int uint4_t;
+//typedef int uint3_t;
+//typedef int uint1_t;
+//typedef float dtf_t;
 
 template<typename T>
 T abs_t(const T &a) {
@@ -125,12 +125,12 @@ struct LRStub {
     int13_t r = 0;
     int14_t phi = 0;
     int14_t z = 0;
-    uint4_t layerId = 0;
+    uint3_t layerId = 0;
     bool psModule = false;
     bool barrel = false;
     bool valid = false;
 
-    explicit LRStub(const int13_t &r = 0, const int13_t &phi = 0, const int13_t &z = 0, const int13_t &layerId = 0,
+    explicit LRStub(const int13_t &r = 0, const int14_t &phi = 0, const int14_t &z = 0, const uint3_t &layerId = 0,
                     const bool &psModule = false, const bool &barrel = false, const bool &valid = false) :
             r(r), phi(phi), z(z), layerId(layerId), valid(valid) {}
 

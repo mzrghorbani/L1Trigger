@@ -32,7 +32,7 @@ public:
     dtf_t lrResidZPS() const;
     uint3_t lrMinLayers() const;
     uint3_t lrMinLayersPS() const;
-    uint3_t lrNumIterations() const;
+    uint4_t lrNumIterations() const;
     uint3_t trackerNumLayers() const;
 
 public:
@@ -42,7 +42,7 @@ public:
     dtf_t lrResidZPS_;
     uint3_t lrMinLayers_;
     uint3_t lrMinLayersPS_;
-    uint3_t lrNumIterations_;
+    uint4_t lrNumIterations_;
     uint3_t trackerNumLayers_;
 };
 

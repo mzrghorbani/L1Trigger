@@ -37,7 +37,7 @@ uint3_t SettingsHLS::lrMinLayersPS() const {
     return lrMinLayersPS_;
 }
 
-uint3_t SettingsHLS::lrNumIterations() const {
+uint4_t SettingsHLS::lrNumIterations() const {
     return lrNumIterations_;
 }
 
