@@ -27,7 +27,6 @@ void LRHLS::produce() {
         trackMHTHLS.phi_ = trackMHT->phi();
         trackMHTHLS.cot_ = trackMHT->cot();
         trackMHTHLS.z_ = trackMHT->z();
-        trackMHTHLS.size_ = trackMHT->size();
         trackMHTHLS.valid_ = trackMHT->valid();
 
         j = 0;
@@ -43,28 +42,26 @@ void LRHLS::produce() {
 
         TMTT::HLS::LRHLS_top(&trackMHTHLS, &trackLRHLS);
 
-        if (trackLRHLS.size() > 1) {
-            Track *trackLR = new Track();
-            trackLR->qOverPt_ = trackLRHLS.qOverPt();
-            trackLR->phi_ = trackLRHLS.phi();
-            trackLR->cot_ = trackLRHLS.cot();
-            trackLR->z_ = trackLRHLS.z();
-            trackLR->valid_ = trackLRHLS.valid();
-            data_->tracksLRHLS().push_back(trackLR);
+        Track *trackLR = new Track();
+        trackLR->qOverPt_ = trackLRHLS.qOverPt();
+        trackLR->phi_ = trackLRHLS.phi();
+        trackLR->cot_ = trackLRHLS.cot();
+        trackLR->z_ = trackLRHLS.z();
+        trackLR->valid_ = trackLRHLS.valid();
+        data_->tracksLRHLS().push_back(trackLR);
 
-            for (j = 0; j < trackLRHLS.size(); j++) {
-                if (trackLRHLS.stubs_[j].valid()) {
-                    Stub *stubLR = new Stub();
-                    stubLR->r_ = trackLRHLS.stubs_[j].r();
-                    stubLR->phi_ = trackLRHLS.stubs_[j].phi();
-                    stubLR->z_ = trackLRHLS.stubs_[j].z();
-                    stubLR->layerId_ = trackLRHLS.stubs_[j].layerId();
-                    stubLR->valid_ = trackLRHLS.stubs_[j].valid();
-                    data_->tracksLRHLS_[i]->stubs_.push_back(stubLR);
-                }
+        for (j = 0; j < 12; j++) {
+            if (trackLRHLS.stubs_[j].valid()) {
+                Stub *stubLR = new Stub();
+                stubLR->r_ = trackLRHLS.stubs_[j].r();
+                stubLR->phi_ = trackLRHLS.stubs_[j].phi();
+                stubLR->z_ = trackLRHLS.stubs_[j].z();
+                stubLR->layerId_ = trackLRHLS.stubs_[j].layerId();
+                stubLR->valid_ = trackLRHLS.stubs_[j].valid();
+                data_->tracksLRHLS_[i]->stubs_.push_back(stubLR);
             }
-            i++;
         }
+        i++;
     }
 
 //    for (auto track : data_->tracksLRHLS()) {

@@ -28,25 +28,25 @@ public:
 
     ~TrackHLS() {}
 
-//    const array_s<Stub> &stubs() const;
     const StubHLS *stubs() const;
-    uint4_t size() const;
     dtf_t qOverPt() const;
     dtf_t phi() const;
     dtf_t cot() const;
     dtf_t z() const;
-    bool valid() const;
+    uint1_t valid() const;
+    uint4_t secPhi() const;
+    uint4_t secEta() const;
 
 public:
 
-//array_s<Stub> stubs_;
 StubHLS stubs_[12];
-uint4_t size_;
 dtf_t qOverPt_;
 dtf_t phi_;
 dtf_t cot_;
 dtf_t z_;
-bool valid_;
+uint4_t secPhi_;
+uint4_t secEta_;
+uint1_t valid_;
 
 };
 

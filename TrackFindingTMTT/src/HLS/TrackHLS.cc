@@ -14,15 +14,7 @@ namespace TMTT {
 namespace HLS {
 #endif
 
-TrackHLS::TrackHLS() : size_(0), qOverPt_(0), phi_(0), cot_(0), z_(0), valid_(false) {}
-
-//const array_s<Stub> &Track::stubs() const {
-//    return stubs_;
-//}
-
-uint4_t TrackHLS::size() const {
-    return size_;
-}
+TrackHLS::TrackHLS() : qOverPt_(0), phi_(0), cot_(0), z_(0), valid_(false) {}
 
 const StubHLS *TrackHLS::stubs() const {
     return stubs_;
@@ -44,8 +36,16 @@ dtf_t TrackHLS::z() const {
     return z_;
 }
 
-bool TrackHLS::valid() const {
+uint1_t TrackHLS::valid() const {
     return valid_;
+}
+
+uint4_t TrackHLS::secPhi() const {
+    return secPhi_;
+}
+
+uint4_t TrackHLS::secEta() const {
+    return secEta_;
 }
 
 #ifdef CMSSW_GIT_HASH
@@ -53,4 +53,3 @@ bool TrackHLS::valid() const {
 
 }
 #endif
-

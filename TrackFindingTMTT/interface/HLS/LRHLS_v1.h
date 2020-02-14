@@ -47,7 +47,7 @@ public:
     TrackHLS *trackIn_;
     TrackHLS *trackOut_;
     LRTrack LRParameter_;
-    LRStub stubs_[12];
+    StubHLS stubs_[12];
     stubData layerPos_[7];
     residData residuals_[12];
     residData largestResid_;

@@ -1,5 +1,5 @@
-#ifndef LRHLS_TYPES_H_
-#define LRHLS_TYPES_H_
+#ifndef __LRHLS_TYPES_H__
+#define __LRHLS_TYPES_H__
 
 /**
  * This defines all types used in HLS code.
@@ -10,9 +10,11 @@
 
 #ifdef CMSSW_GIT_HASH
 #include <iostream>
+#include <ap_int.h>
 #include <ap_fixed.h>
 #include <cmath>
 #else
+#include <ap_int.h>
 #include <ap_fixed.h>
 #include <cmath>
 #endif
@@ -25,35 +27,35 @@ namespace HLS {
 
 
 enum {
-    B14 = 14, B13 = 13, B4 = 4, B3 = 3, B1 = 1
+    B17 = 17, B16 = 16, B14 = 14, B13 = 13, B12 = 12, B5 = 5, B4 = 4, B3 = 3, B1 = 1
 };
 enum {
-    WB = 18, IB = 14, FB = WB - IB
+    WB = 23, IB = 17, FB = WB - IB
 };
 
-// Fixed-point variables used in HW
-// typedef ap_uint<B1> uint1_t;
-// typedef ap_uint<B3> uint3_t;
-// typedef ap_uint<B4> uint4_t;
-// typedef ap_int<B13> int13_t;
-// typedef ap_int<B14> int14_t;
-// typedef ap_fixed<WB,IB> dtf_t;
-
-// Fixed-point variables used in SW
+// HLS variables for HW tests
 //typedef ap_uint<B1> uint1_t;
 //typedef ap_uint<B3> uint3_t;
 //typedef ap_uint<B4> uint4_t;
-//typedef ap_fixed<B13,9> int13_t;
-//typedef ap_fixed<B14,10> int14_t;
+//typedef ap_int<B13> int13_t;
+//typedef ap_int<B14> int14_t;
 //typedef ap_fixed<WB,IB> dtf_t;
 
-// Fixed-point variables used in Tests
-typedef float int13_t;
-typedef float int14_t;
-typedef int uint4_t;
-typedef int uint3_t;
-typedef bool uint1_t;
-typedef float dtf_t;
+// Fixed-point variables used in SW
+typedef ap_uint<B1> uint1_t;
+typedef ap_uint<B3> uint3_t;
+typedef ap_uint<B4> uint4_t;
+typedef ap_fixed<WB,B13> int13_t;
+typedef ap_fixed<WB,B14> int14_t;
+typedef ap_fixed<WB+WB,B14+B13> dtf_t;
+
+// HLS variables for SW tests
+// typedef float int13_t;
+// typedef float int14_t;
+// typedef int uint4_t;
+// typedef int uint3_t;
+// typedef int uint1_t;
+// typedef float dtf_t;
 
 template<typename T>
 T abs_t(const T &a) {
@@ -92,7 +94,7 @@ pair_t<T1, T2> make_pair_t(const T1 &a, const T2 &b) {
 template<typename T>
 struct array_t {
     int size_;
-    T data_[12];
+    T data_[250];
     array_t() : size_(0) {}
     void push_back(const T &value) { data_[size_++] = value; }
     T &operator[](const int &idx) { return data_[idx]; }
@@ -105,19 +107,55 @@ struct array_t {
     void clear() { size_ = 0; }
 };
 
+template<typename T>
+struct array_s {
+    int size_;
+    T data_[12];
+    array_s() : size_(0) {}
+    void push_back(const T &value) { data_[size_++] = value; }
+    T &operator[](const int &idx) { return data_[idx]; }
+    const T &operator[](const int &idx) const { return data_[idx]; }
+    T *begin() { return &data_[0]; }
+    const T *begin() const { return &data_[0]; }
+    T *end() { return &data_[size_]; }
+    const T *end() const { return &data_[size_]; }
+    int size() const { return size_; }
+    void clear() { size_ = 0; }
+};
+
 struct LRStub {
-	int13_t r = 0;
-	int14_t phi = 0;
-	int14_t z = 0;
-	uint3_t layerId = 0;
-	bool valid = false;
+
+    int13_t r = 0;
+    int14_t phi = 0;
+    int14_t z = 0;
+    uint3_t layerId = 0;
+    bool psModule = false;
+    bool barrel = false;
+    bool valid = false;
+
+    explicit LRStub(const int13_t &r = 0, const int14_t &phi = 0, const int14_t &z = 0, const uint3_t &layerId = 0,
+                    const bool &psModule = false, const bool &barrel = false, const bool &valid = false) :
+            r(r), phi(phi), z(z), layerId(layerId), valid(valid) {}
+
 };
 
 struct LRTrack {
     dtf_t qOverPt = 0;
     dtf_t phiT = 0;
-    dtf_t cotT = 0;
+    dtf_t cotTheta = 0;
     dtf_t zT = 0;
+
+    explicit LRTrack(const dtf_t &qOverPt = 0, const dtf_t &phiT = 0, const dtf_t &cotTheta = 0,
+                     const dtf_t &zT = 0) :
+            qOverPt(qOverPt), phiT(phiT), cotTheta(cotTheta), zT(zT) {}
+
+    LRTrack& operator +=(const LRTrack& a) {
+        qOverPt += a.qOverPt;
+        phiT += a.phiT;
+        cotTheta += a.cotTheta;
+        zT += a.zT;
+        return *this;
+    }
 };
 
 struct stubData {
@@ -125,6 +163,9 @@ struct stubData {
     dtf_t Phi = 0;
     dtf_t RZ = 0;
     dtf_t Z = 0;
+
+    explicit stubData(const dtf_t &RPhi = 0, const dtf_t &Phi = 0, const dtf_t &RZ = 0, const dtf_t &Z = 0) :
+            RPhi(RPhi), Phi(Phi), RZ(RZ), Z(Z) {}
 
     stubData &operator<=(const stubData &a) {
         RPhi = min_t(RPhi, a.RPhi);
@@ -142,12 +183,8 @@ struct stubData {
         return *this;
     }
 
-    stubData operator+(const stubData &a) {
-    	RPhi += a.RPhi;
-    	Phi += a.Phi;
-    	RZ += a.RZ;
-    	Z += a.Z;
-        return *this;
+    stubData operator+(const stubData &a) const {
+        return stubData(RPhi + a.RPhi, Phi + a.Phi, RZ + a.RZ, Z + a.Z);
     }
 
     stubData &operator/=(const dtf_t &a) {
@@ -165,6 +202,10 @@ struct sumData {
     dtf_t x = 0;
     dtf_t y = 0;
     dtf_t xx = 0;
+
+    explicit sumData(const dtf_t &n = 0, const dtf_t &xy = 0, const dtf_t &x = 0, const dtf_t &y = 0,
+                     const dtf_t &xx = 0) :
+            n(n), xy(xy), x(x), y(y), xx(xx) {}
 
     sumData &operator+=(const sumData &stub) {
         n++;
@@ -197,7 +238,12 @@ struct residData {
     dtf_t z = 0;
     uint3_t layerId = 0;
     uint4_t stubId = 0;
-    uint1_t valid = false;
+    bool ps = false;
+    bool valid = false;
+
+    explicit residData(const dtf_t &phi = 0, const dtf_t &z = 0, const uint3_t &layerId = 0,
+                       const uint4_t &stubId = 0, const uint1_t &ps = false, const uint1_t &valid = false) :
+            phi(phi), z(z), layerId(layerId), stubId(stubId), ps(ps), valid(valid) {}
 
     dtf_t combined() const {
         return (phi + z);
