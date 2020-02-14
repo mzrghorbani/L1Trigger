@@ -31,28 +31,28 @@ enum {
 };
 
 // HLS variables for HW tests
-typedef ap_uint<B1> uint1_t;
-typedef ap_uint<B3> uint3_t;
-typedef ap_uint<B4> uint4_t;
-typedef ap_int<B13> int13_t;
-typedef ap_int<B14> int14_t;
-typedef ap_fixed<WB,IB> dtf_t;
-
-// Fixed-point variables used in SW
 //typedef ap_uint<B1> uint1_t;
 //typedef ap_uint<B3> uint3_t;
 //typedef ap_uint<B4> uint4_t;
-//typedef ap_fixed<WB,B13> int13_t;
-//typedef ap_fixed<WB,B14> int14_t;
-//typedef ap_fixed<WB+WB,B14+B13> dtf_t;
+//typedef ap_int<B13> int13_t;
+//typedef ap_int<B14> int14_t;
+//typedef ap_fixed<WB,IB> dtf_t;
+
+// Fixed-point variables used in SW
+typedef ap_uint<B1> uint1_t;
+typedef ap_uint<B3> uint3_t;
+typedef ap_uint<B4> uint4_t;
+typedef ap_fixed<WB,B13> int13_t;
+typedef ap_fixed<WB,B14> int14_t;
+typedef ap_fixed<WB+WB,B14+B13> dtf_t;
 
 // HLS variables for SW tests
-//typedef float int13_t;
-//typedef float int14_t;
-//typedef int uint4_t;
-//typedef int uint3_t;
-//typedef int uint1_t;
-//typedef float dtf_t;
+// typedef float int13_t;
+// typedef float int14_t;
+// typedef int uint4_t;
+// typedef int uint3_t;
+// typedef int uint1_t;
+// typedef float dtf_t;
 
 template<typename T>
 T abs_t(const T &a) {
