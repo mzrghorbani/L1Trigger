@@ -39,20 +39,20 @@ enum {
 //typedef ap_fixed<WB,IB> dtf_t;
 
 // Fixed-point variables used in SW
-typedef ap_uint<B1> uint1_t;
-typedef ap_uint<B3> uint3_t;
-typedef ap_uint<B4> uint4_t;
-typedef ap_fixed<WB,B13> int13_t;
-typedef ap_fixed<WB,B14> int14_t;
-typedef ap_fixed<WB+IB,IB+IB> dtf_t;
+//typedef ap_uint<B1> uint1_t;
+//typedef ap_uint<B3> uint3_t;
+//typedef ap_uint<B4> uint4_t;
+//typedef ap_fixed<WB,B13> int13_t;
+//typedef ap_fixed<WB,B14> int14_t;
+//typedef ap_fixed<WB+IB,IB+IB> dtf_t;
 
 // Fixed-point variables used in Tests
-//typedef float int13_t;
-//typedef float int14_t;
-//typedef int uint4_t;
-//typedef int uint3_t;
-//typedef bool uint1_t;
-//typedef float dtf_t;
+typedef float int13_t;
+typedef float int14_t;
+typedef int uint4_t;
+typedef int uint3_t;
+typedef bool uint1_t;
+typedef float dtf_t;
 
 template<typename T>
 T abs_t(const T &a) {
@@ -115,7 +115,7 @@ struct LRStub {
 struct LRTrack {
     dtf_t qOverPt = 0;
     dtf_t phiT = 0;
-    dtf_t cotT = 0;
+    dtf_t cotTheta = 0;
     dtf_t zT = 0;
 };
 
@@ -124,6 +124,9 @@ struct stubData {
     dtf_t Phi = 0;
     dtf_t RZ = 0;
     dtf_t Z = 0;
+
+    explicit stubData(const dtf_t &RPhi = 0, const dtf_t &Phi = 0, const dtf_t &RZ = 0, const dtf_t &Z = 0) :
+                RPhi(RPhi), Phi(Phi), RZ(RZ), Z(Z) {}
 
     stubData &operator<=(const stubData &a) {
         RPhi = min_t(RPhi, a.RPhi);
