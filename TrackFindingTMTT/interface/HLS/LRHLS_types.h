@@ -30,24 +30,24 @@ enum {
     B17 = 17, B16 = 16, B14 = 14, B13 = 13, B12 = 12, B5 = 5, B4 = 4, B3 = 3, B1 = 1
 };
 enum {
-    WB = 23, IB = 17, FB = WB - IB
+    WB = 18, IB = 16, FB = WB - IB
 };
 
 // HLS variables for HW tests
-//typedef ap_uint<B1> uint1_t;
-//typedef ap_uint<B3> uint3_t;
-//typedef ap_uint<B4> uint4_t;
-//typedef ap_int<B13> int13_t;
-//typedef ap_int<B14> int14_t;
-//typedef ap_fixed<WB,IB> dtf_t;
-
-// Fixed-point variables used in SW
 typedef ap_uint<B1> uint1_t;
 typedef ap_uint<B3> uint3_t;
 typedef ap_uint<B4> uint4_t;
-typedef ap_fixed<WB,B13> int13_t;
-typedef ap_fixed<WB,B14> int14_t;
-typedef ap_fixed<WB+WB,B14+B13> dtf_t;
+typedef ap_int<B13> int13_t;
+typedef ap_int<B14> int14_t;
+typedef ap_fixed<WB,IB> dtf_t;
+
+// Fixed-point variables used in SW
+//typedef ap_uint<B1> uint1_t;
+//typedef ap_uint<B3> uint3_t;
+//typedef ap_uint<B4> uint4_t;
+//typedef ap_fixed<WB,B13> int13_t;
+//typedef ap_fixed<WB,B14> int14_t;
+//typedef ap_fixed<WB+WB,B14+B13> dtf_t;
 
 // HLS variables for SW tests
 // typedef float int13_t;
