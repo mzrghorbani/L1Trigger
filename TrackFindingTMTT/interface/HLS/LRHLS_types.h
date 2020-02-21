@@ -27,7 +27,7 @@ enum {
     B14 = 14, B13 = 13, B4 = 4, B3 = 3, B1 = 1
 };
 enum {
-    WB = 18, IB = 14, FB = WB - IB
+    WB = 18, IB = 16, FB = WB - IB
 };
 
 // Fixed-point variables used in HW

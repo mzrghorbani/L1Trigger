@@ -33,8 +33,8 @@ void LRHLS::produce() {
           TMTT::HLS::LRHLS_top(stubIn, stubOut);
 
           stub.r_ = stubOut->r();
-          stub.r_ = stubOut->phi();
-          stub.r_ = stubOut->z();
+          stub.phi_ = stubOut->phi();
+          stub.z_ = stubOut->z();
           stub.layerId_ = stubOut->layerId();
           stub.valid_ = stubOut->valid();
 

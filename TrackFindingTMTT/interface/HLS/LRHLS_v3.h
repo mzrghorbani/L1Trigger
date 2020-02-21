@@ -31,10 +31,10 @@ public:
 
 public:
 
-    LRStub stubs_[6];
+    LRStub stubs_[12];
     LRTrack LRParameter_;
     stubData layerPos_[7];
-    residData residuals_[6];
+    residData residuals_[12];
     residData largestResid_;
     uint3_t layerPopulation_[7];
     uint3_t nLayers_;

@@ -17,10 +17,9 @@ namespace HLS {
 LRHLS_v3::LRHLS_v3(StubHLS *stubIn, StubHLS *stubOut) {
 
 	unsigned int i, j;
-	unsigned int k = 0;
 
-	for(i = 0; i < 6; i++) {
-		for (j = 5; j > 0; --j)
+	for(i = 0; i < 12; i++) {
+		for (j = 11; j > 0; --j)
 			stubs_[j] = stubs_[j-1];
 
 		stubs_[0].r = stubIn->r();
@@ -39,7 +38,7 @@ LRHLS_v3::LRHLS_v3(StubHLS *stubIn, StubHLS *stubOut) {
 	valid_ = false;
 
 	// initfit
-	for(i = 0; i < 6; ++i) {
+	for(i = 0; i < 12; ++i) {
 		if(stubs_[i].valid){
 			switch(stubs_[i].layerId) {
 				case 1:
@@ -87,13 +86,13 @@ LRHLS_v3::LRHLS_v3(StubHLS *stubIn, StubHLS *stubOut) {
 			valid_ = true;
 
 	if(not valid_) {
-		for(i = 0; i < 6; i++) {
-			stubOut->r_ = stubs_[5].r;
-			stubOut->phi_ = stubs_[5].phi;
-			stubOut->z_ = stubs_[5].z;
-			stubOut->layerId_ = stubs_[5].layerId;
-			stubOut->valid_ = stubs_[5].valid;
-			for (j = 5; j > 0; --j)
+		for(i = 0; i < 12; i++) {
+			stubOut->r_ = stubs_[11].r;
+			stubOut->phi_ = stubs_[11].phi;
+			stubOut->z_ = stubs_[11].z;
+			stubOut->layerId_ = stubs_[11].layerId;
+			stubOut->valid_ = stubs_[11].valid;
+			for (j = 11; j > 0; --j)
 				stubs_[j] = stubs_[j-1];
 		}
 
@@ -122,7 +121,7 @@ LRHLS_v3::LRHLS_v3(StubHLS *stubIn, StubHLS *stubOut) {
 			layerMaxPos[i].Z = -4096;
 		}
 
-		for (i = 0; i < 6; i++) {
+		for (i = 0; i < 12; i++) {
 
 			if (stubs_[i].valid) {
 				stubData pos(stubs_[i].r, stubs_[i].phi, stubs_[i].r, stubs_[i].z);
@@ -226,21 +225,24 @@ LRHLS_v3::LRHLS_v3(StubHLS *stubIn, StubHLS *stubOut) {
 			zSums.xx += zSum[i].xx;
 		}
 
-		dtf_t temp1 = dtf_t(phiSums.n * phiSums.xy - phiSums.x * phiSums.y);
-		dtf_t temp2 = dtf_t(phiSums.y * phiSums.xx - phiSums.x * phiSums.xy);
-		dtf_t temp3 = dtf_t(phiSums.n * phiSums.xx - phiSums.x * phiSums.x);
+		// dtf_t temp1 = dtf_t(phiSums.n * phiSums.xy - phiSums.x * phiSums.y);
+		// dtf_t temp2 = dtf_t(phiSums.y * phiSums.xx - phiSums.x * phiSums.xy);
+		// dtf_t temp3 = dtf_t(phiSums.n * phiSums.xx - phiSums.x * phiSums.x);
 
-		pair_t<dtf_t, dtf_t> phiParameter;
-		phiParameter.first = dtf_t(temp1 / temp3);
-		phiParameter.second = dtf_t(temp2 / temp3);
+		// pair_t<dtf_t, dtf_t> phiParameter;
+		// phiParameter.first = dtf_t(temp1 / temp3);
+		// phiParameter.second = dtf_t(temp2 / temp3);
 
-		dtf_t temp4 = dtf_t(zSums.n * zSums.xy - zSums.x * zSums.y);
-		dtf_t temp5 = dtf_t(zSums.y * zSums.xx - zSums.x * zSums.xy);
-		dtf_t temp6 = dtf_t(zSums.n * zSums.xx - zSums.x * zSums.x);
+		// dtf_t temp4 = dtf_t(zSums.n * zSums.xy - zSums.x * zSums.y);
+		// dtf_t temp5 = dtf_t(zSums.y * zSums.xx - zSums.x * zSums.xy);
+		// dtf_t temp6 = dtf_t(zSums.n * zSums.xx - zSums.x * zSums.x);
 
-		pair_t<dtf_t, dtf_t> zParameter;
-		zParameter.first = dtf_t(temp4 / temp6);
-		zParameter.second = dtf_t(temp5 / temp6);
+		// pair_t<dtf_t, dtf_t> zParameter;
+		// zParameter.first = dtf_t(temp4 / temp6);
+		// zParameter.second = dtf_t(temp5 / temp6);
+		
+		const pair_t<dtf_t,dtf_t>& phiParameter = phiSums.calcLinearParameter();
+    	const pair_t<dtf_t,dtf_t>& zParameter = zSums.calcLinearParameter();
 
 		LRParameter_.qOverPt = phiParameter.first;
 		LRParameter_.phiT = phiParameter.second;
@@ -262,7 +264,7 @@ LRHLS_v3::LRHLS_v3(StubHLS *stubIn, StubHLS *stubOut) {
 			}
 		}
 
-		for (i = 0; i < 6; i++) {
+		for (i = 0; i < 12; i++) {
 			residuals_[i].phi = 0;
 			residuals_[i].z = 0;
 			residuals_[i].stubId = 0;
@@ -270,7 +272,7 @@ LRHLS_v3::LRHLS_v3(StubHLS *stubIn, StubHLS *stubOut) {
 			residuals_[i].valid = false;
 		}
 
-		for (i = 0; i < 6; i++) {
+		for (i = 0; i < 12; i++) {
 			LRStub stub = stubs_[i];
 
 			if (stub.valid) {
@@ -298,7 +300,7 @@ LRHLS_v3::LRHLS_v3(StubHLS *stubIn, StubHLS *stubOut) {
 		largestResid_.layerId = 0;
 		largestResid_.valid = false;
 
-		for (i = 0; i < 6; i++) {
+		for (i = 0; i < 12; i++) {
 			residData residual = residuals_[i];
 
 			if (residual.valid) {
@@ -339,13 +341,13 @@ LRHLS_v3::LRHLS_v3(StubHLS *stubIn, StubHLS *stubOut) {
 
 
 	// create
-	for(i = 0; i < 6; i++) {
-		stubOut->r_ = stubs_[5].r;
-		stubOut->phi_ = stubs_[5].phi;
-		stubOut->z_ = stubs_[5].z;
-		stubOut->layerId_ = stubs_[5].layerId;
-		stubOut->valid_ = stubs_[5].valid;
-		for (j = 5; j > 0; --j)
+	for(i = 0; i < 12; i++) {
+		stubOut->r_ = stubs_[11].r;
+		stubOut->phi_ = stubs_[11].phi;
+		stubOut->z_ = stubs_[11].z;
+		stubOut->layerId_ = stubs_[11].layerId;
+		stubOut->valid_ = stubs_[11].valid;
+		for (j = 11; j > 0; --j)
 			stubs_[j] = stubs_[j-1];
 	}
 
