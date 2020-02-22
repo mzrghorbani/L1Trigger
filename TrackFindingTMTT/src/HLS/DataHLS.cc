@@ -2,17 +2,10 @@
 Created by Maziar Ghorbani - Brunel University on 12/06/19.
 */
 
-#ifndef __LRHLS_TOP_H__
-#define __LRHLS_TOP_H__
-
 #ifdef CMSSW_GIT_HASH
-#include "L1Trigger/TrackFindingTMTT/interface/HLS/LRHLS_types.h"
 #include "L1Trigger/TrackFindingTMTT/interface/HLS/DataHLS.h"
-#include "L1Trigger/TrackFindingTMTT/interface/HLS/LRHLS_v3.h"
 #else
-#include "LRHLS_types.h"
 #include "DataHLS.h"
-#include "LRHLS_v3.h"
 #endif
 
 #ifdef CMSSW_GIT_HASH
@@ -21,7 +14,17 @@ namespace TMTT {
 namespace HLS {
 #endif
 
-void LRHLS_top(DataHLS *dataHLS);
+DataHLS::DataHLS() {
+
+}
+
+const StubHLS *DataHLS::stubsMHT() const {
+    return stubsMHT_;
+}
+
+const StubHLS *DataHLS::stubsLR() const {
+    return stubsLR_;
+}
 
 #ifdef CMSSW_GIT_HASH
 }
@@ -29,4 +32,3 @@ void LRHLS_top(DataHLS *dataHLS);
 }
 #endif
 
-#endif

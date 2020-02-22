@@ -27,16 +27,16 @@ enum {
     B14 = 14, B13 = 13, B4 = 4, B3 = 3, B1 = 1
 };
 enum {
-    WB = 18, IB = 16, FB = WB - IB
+    WB = 27, IB = 19, FB = WB - IB
 };
 
 // Fixed-point variables used in HW
-//typedef ap_uint<B1> uint1_t;
-//typedef ap_uint<B3> uint3_t;
-//typedef ap_uint<B4> uint4_t;
-//typedef ap_int<B13> int13_t;
-//typedef ap_int<B14> int14_t;
-//typedef ap_fixed<WB,IB> dtf_t;
+typedef ap_uint<B1> uint1_t;
+typedef ap_uint<B3> uint3_t;
+typedef ap_uint<B4> uint4_t;
+typedef ap_int<B13> int13_t;
+typedef ap_int<B14> int14_t;
+typedef ap_fixed<WB,IB> dtf_t;
 
 // Fixed-point variables used in SW
 //typedef ap_uint<B1> uint1_t;
@@ -47,12 +47,12 @@ enum {
 //typedef ap_fixed<WB+IB,IB+IB> dtf_t;
 
 // Fixed-point variables used in Tests
-typedef float int13_t;
-typedef float int14_t;
-typedef int uint4_t;
-typedef int uint3_t;
-typedef bool uint1_t;
-typedef float dtf_t;
+//typedef float int13_t;
+//typedef float int14_t;
+//typedef int uint4_t;
+//typedef int uint3_t;
+//typedef bool uint1_t;
+//typedef float dtf_t;
 
 template<typename T>
 T abs_t(const T &a) {
@@ -199,7 +199,6 @@ struct residData {
     dtf_t z = 0;
     uint3_t layerId = 0;
     uint4_t stubId = 0;
-    uint1_t keep = false;
     uint1_t valid = false;
 
     dtf_t combined() const {

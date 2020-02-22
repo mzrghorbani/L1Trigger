@@ -17,33 +17,49 @@ void LRHLS::produce() {
 
     for (auto trackMHT : data_->tracksMHT()) {
 
-        for (auto stubMHT : trackMHT->stubs()) {
+      Track *trackLR = new Track();
+      DataHLS *dataHLS = new DataHLS();
+      int k = 0;
 
-          StubHLS *stubIn = new StubHLS();
-          StubHLS *stubOut = new StubHLS();
-          Stub *stub = new Stub();
-          TrackLR *track = new Track();
+      for (auto stubMHT : trackMHT->stubs()) {
 
-          stubIn->r_ = stubMHT->r();
-          stubIn->phi_ = stubMHT->phi();
-          stubIn->z_ = stubMHT->z();
-          stubIn->layerId_ = stubMHT->layerId();
-          stubIn->valid_ = stubMHT->valid();
+        StubHLS *stubIn = new StubHLS();
+        Stub *stubOut = new Stub();
 
-          TMTT::HLS::LRHLS_top(stubIn, stubOut);
+        stubIn->r_ = stubMHT->r();
+        stubIn->phi_ = stubMHT->phi();
+        stubIn->z_ = stubMHT->z();
+        stubIn->layerId_ = stubMHT->layerId();
+        stubIn->valid_ = stubMHT->valid();
 
-          stub.r_ = stubOut->r();
-          stub.phi_ = stubOut->phi();
-          stub.z_ = stubOut->z();
-          stub.layerId_ = stubOut->layerId();
-          stub.valid_ = stubOut->valid();
+        dataHLS->stubsMHT_[k] = *stubIn;
+        k++;
 
-          trackLR->stubs_.push_back(stub);
+        if(k == trackMHT->size())
+          TMTT::HLS::LRHLS_top(dataHLS);
+        else
+          continue;
+
+        int i;
+        for(i = 0; i < 12; i++) {
+          if(dataHLS->stubsLR_[i].valid()) {
+
+            stubOut->r_ = dataHLS->stubsLR_[i].r();
+            stubOut->phi_ = dataHLS->stubsLR_[i].phi();
+            stubOut->z_ = dataHLS->stubsLR_[i].z();
+            stubOut->layerId_ = dataHLS->stubsLR_[i].layerId();
+            stubOut->valid_ = dataHLS->stubsLR_[i].valid();
+
+            trackLR->stubs_.push_back(stubOut);
+          }
+        }
       }
-      data_->trackLRHLS_.push_back(trackLR);
+
+      data_->tracksLRHLS_.push_back(trackLR);
     }
 
    // for (auto track : data_->tracksLRHLS()) {
+   //          std::cout << track->size() << std::endl;
    //     std::cout << "size :    " << track->size() << std::endl;
    //     std::cout << "qOverPt : " << track->qOverPt() << std::endl;
    //     std::cout << "phi :     " << track->phi() << std::endl;
