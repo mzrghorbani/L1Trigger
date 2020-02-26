@@ -1,7 +1,7 @@
 CMakeLists.txt
-/.idea/
-/cmake-build-debug/
-/TrackFindingTMTT/python/TMTrackProducer_Defaults_cfi.pyc
-/TrackFindingTMTT/python/TMTrackProducer_Ultimate_cff.pyc
-/TrackFindingTMTT/python/TMTrackProducer_cff.pyc
-/TrackFindingTMTT/python/__init__.pyc
+.idea/
+cmake-build-debug/
+TrackFindingTMTT/python/TMTrackProducer_Defaults_cfi.pyc
+TrackFindingTMTT/python/TMTrackProducer_Ultimate_cff.pyc
+TrackFindingTMTT/python/TMTrackProducer_cff.pyc
+TrackFindingTMTT/python/__init__.pyc
