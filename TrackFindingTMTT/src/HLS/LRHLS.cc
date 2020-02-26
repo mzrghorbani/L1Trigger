@@ -17,7 +17,8 @@ void LRHLS::produce() {
     auto *settingsHLS = new SettingsHLS();
 
     int i = 0;
-    int j = 0;
+
+    dataHLS->tracksLRHLS_.clear();
 
     settingsHLS->lrResidPhi_ = settings_->lrResidPhi();
     settingsHLS->lrResidZ2S_ = settings_->lrResidZ2S();
@@ -51,6 +52,9 @@ void LRHLS::produce() {
         }
         i++;
     }
+
+    std::cout << "size : " << dataHLS->tracksMHTHLS().size() << std::endl;
+    std::cout << "size : " << dataHLS->tracksLRHLS().size() << std::endl;
 
     TMTT::HLS::LRHLS_top(settingsHLS, dataHLS);
 

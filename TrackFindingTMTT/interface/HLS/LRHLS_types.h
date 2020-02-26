@@ -10,6 +10,9 @@
 
 #ifdef CMSSW_GIT_HASH
 #include <iostream>
+#include <ap_int.h>
+#include <ap_fixed.h>
+#include <cmath>
 #else
 #include <ap_int.h>
 #include <ap_fixed.h>
@@ -21,7 +24,6 @@ namespace TMTT {
 
 namespace HLS {
 #endif
-
 
 enum {
     B17 = 17, B16 = 16, B14 = 14, B13 = 13, B12 = 12, B5 = 5, B4 = 4, B3 = 3, B1 = 1
@@ -39,20 +41,20 @@ enum {
 //typedef ap_fixed<WB,IB> dtf_t;
 
 // Fixed-point variables used in SW
-typedef ap_uint<B1> uint1_t;
-typedef ap_uint<B3> uint3_t;
-typedef ap_uint<B4> uint4_t;
-typedef ap_fixed<WB,B13> int13_t;
-typedef ap_fixed<WB,B14> int14_t;
-typedef ap_fixed<WB+WB,B14+B13> dtf_t;
+//typedef ap_uint<B1> uint1_t;
+//typedef ap_uint<B3> uint3_t;
+//typedef ap_uint<B4> uint4_t;
+//typedef ap_fixed<WB,B13> int13_t;
+//typedef ap_fixed<WB,B14> int14_t;
+//typedef ap_fixed<WB+WB,B14+B13> dtf_t;
 
 // HLS variables for SW tests
-// typedef float int13_t;
-// typedef float int14_t;
-// typedef int uint4_t;
-// typedef int uint3_t;
-// typedef int uint1_t;
-// typedef float dtf_t;
+typedef float int13_t;
+typedef float int14_t;
+typedef int uint4_t;
+typedef int uint3_t;
+typedef int uint1_t;
+typedef float dtf_t;
 
 template<typename T>
 T abs_t(const T &a) {
@@ -91,7 +93,7 @@ pair_t<T1, T2> make_pair_t(const T1 &a, const T2 &b) {
 template<typename T>
 struct array_t {
     int size_;
-    T data_[250];
+    T data_[300];
     array_t() : size_(0) {}
     void push_back(const T &value) { data_[size_++] = value; }
     T &operator[](const int &idx) { return data_[idx]; }

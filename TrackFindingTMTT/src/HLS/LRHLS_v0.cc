@@ -29,36 +29,30 @@ LRHLS_v0::LRHLS_v0(const SettingsHLS *settingsHLS, DataHLS *dataHLS) :
 
 void LRHLS_v0::produce() {
 
-	int i;
 	int k = 0;
 	uint4_t j;
 
-    for (i = 0; i < 300; i++) {
-    	if (dataHLS_->tracksMHTHLS()[i].valid()) {
-    		TrackHLS track = dataHLS_->tracksMHTHLS()[i];
-    		track_ = track;
-			initFit();
-			if (not valid_) {
-				create();
-				continue;
-			}
-			for (j = 0; j < maxIteartions_; j++) {
-				nIterations_++;
-				calcHelix();
-				calcResidual();
-				bool nothingToKill = killLargestResidual();
-				if (nothingToKill)
-					break;
-				if (nIterations_ == maxIteartions_)
-					break;
-			}
-			create();
+    for (const auto& track : dataHLS_->tracksMHTHLS()) {
+        track_ = track;
+        initFit();
+        if (not valid_) {
+            create();
+            continue;
+        }
+        while(true) {
+            nIterations_++;
+            calcHelix();
+            calcResidual();
+            bool nothingToKill = killLargestResidual();
+            if (nothingToKill)
+                break;
+            if (nIterations_ == maxIteartions_)
+                break;
+        }
+        create();
 
-			if(valid_) {
-				dataHLS_->tracksLRHLS_[k] = track_;
-				k++;
-			}
-		}
+        if(valid_)
+            dataHLS_->tracksLRHLS_.push_back(track_);
     }
 }
 
@@ -72,8 +66,9 @@ void LRHLS_v0::initFit() {
     secEta_ = track_.secEta();
     HTParameter_ = LRTrack(track_.qOverPt(), track_.phi(), track_.cot(), track_.z());
     LRParameter_ = HTParameter_;
-    for (i = 0; i < 12; i++)
-    	stubs_[i] = track_.stubs()[i];
+    stubs_.clear();
+    for (const auto& stub : track_.stubs())
+        stubs_.push_back(stub);
 
     valid_ = checkValidity(stubs_);
     if (not valid_)
@@ -102,9 +97,7 @@ void LRHLS_v0::initFit() {
     uint3_t j5 = 0;
     uint3_t j6 = 0;
 
-    for (i = 0; i < 12; i++) {
-    	StubHLS stub = stubs_[i];
-
+    for (const auto& stub : stubs_) {
         if (stub.valid()) {
             switch (stub.layerId()) {
             case 1:
@@ -155,7 +148,7 @@ void LRHLS_v0::initFit() {
     largestResid_ = residData(-1. , -1., 0, 0, false, false);
 }
 
-bool LRHLS_v0::checkValidity(StubHLS stubs[12]) const {
+bool LRHLS_v0::checkValidity(const array_s<StubHLS>& stubs) const {
 
     bool valid = true;
 
@@ -168,7 +161,7 @@ bool LRHLS_v0::checkValidity(StubHLS stubs[12]) const {
     return valid;
 }
 
-uint3_t LRHLS_v0::countLayers(StubHLS stubs[12], const bool &onlySeed) const {
+uint3_t LRHLS_v0::countLayers(const array_s<StubHLS>& stubs, const bool &onlySeed) const {
 
     uint4_t i;
     uint4_t nLayers = 0;
@@ -177,8 +170,7 @@ uint3_t LRHLS_v0::countLayers(StubHLS stubs[12], const bool &onlySeed) const {
     for (i = 0; i < 7; i++)
     	foundLayers[i] = 0;
 
-    for (i = 0; i < 12; i++) {
-    	StubHLS stub = stubs_[i];
+    for (const auto& stub : stubs) {
         if (stub.valid()) {
             if (!onlySeed || stub.psModule()) {
                 foundLayers[stub.layerId()] = 1;
@@ -278,13 +270,13 @@ bool LRHLS_v0::killLargestResidual() {
     const uint3_t & layerID = largestResid_.layerId;
     const uint4_t & stubID = largestResid_.stubId;
     stubMap_[layerID][stubID].valid_ = false;
-    for (i = 0; i < 12; i++)
-    	stubs_[i].valid_ = false;
+
+    stubs_.clear();
 
     for (i = 0; i < 7; i++)
     	for (j = 0; j < 4; j++)
     		if (stubMap_[i][j].valid_)
-    			stubs_[k++] = stubMap_[i][j];
+    			stubs_.push_back(stubMap_[i][j]);
 
     layerPopulation_[layerID]--;
     nStubs_--;
@@ -328,14 +320,13 @@ void LRHLS_v0::findLargestResidual() {
     }
 }
 
-uint4_t LRHLS_v0::countStubs(StubHLS stubs[12], const bool &onlyPS) const {
+uint4_t LRHLS_v0::countStubs(const array_s<StubHLS>& stubs, const bool &onlyPS) const {
 
 	uint4_t i;
     uint4_t nStubs(0);
 
     if (onlyPS) {
-        for (i = 0; i < 12; i++) {
-        	StubHLS stub = stubs_[i];
+        for (const auto& stub : stubs) {
             if (stub.valid()) {
                 if (stub.psModule()) {
                     nStubs++;
@@ -363,9 +354,9 @@ void LRHLS_v0::create() {
         track.secPhi_ = secPhi_;
         track.secEta_ = secEta_;
         track.valid_ = true;
-        for (i = 0; i < 12; i++)
-        	if(stubs_[i].valid())
-        		track.stubs_[k++] = stubs_[i];
+        for (const auto& stub : stubs_)
+        	if(stub.valid())
+        		track.stubs_.push_back(stub);
 
         track_ = track;
     }

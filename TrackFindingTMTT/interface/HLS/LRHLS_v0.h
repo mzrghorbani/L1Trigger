@@ -43,9 +43,9 @@ public:
     void calcResidual();
     bool killLargestResidual();
     void findLargestResidual();
-    bool checkValidity(StubHLS stubs[12]) const;
-    uint4_t countStubs(StubHLS stubs[12], const bool& onlyPS = false) const;
-    uint3_t countLayers(StubHLS stubs[12], const bool& onlySeed = false) const;
+    bool checkValidity(const array_s<StubHLS>& stubs) const;
+    uint4_t countStubs(const array_s<StubHLS>& stubs, const bool& onlyPS = false) const;
+    uint3_t countLayers(const array_s<StubHLS>& stubs, const bool& onlySeed = false) const;
 
 
 public:
@@ -65,7 +65,7 @@ public:
     uint4_t secEta_;
     LRTrack HTParameter_;
     LRTrack LRParameter_;
-    StubHLS stubs_[12];
+    array_s<StubHLS> stubs_;
     StubHLS stubMap_[7][4];
     residData residuals_[7][4];
     uint3_t layerPopulation_[7];

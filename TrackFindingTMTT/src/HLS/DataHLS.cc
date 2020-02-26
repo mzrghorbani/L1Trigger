@@ -18,11 +18,11 @@ DataHLS::DataHLS() {
 
 }
 
-const TrackHLS *DataHLS::tracksMHTHLS() const {
+const array_t<TrackHLS> &DataHLS::tracksMHTHLS() const {
     return tracksMHTHLS_;
 }
 
-const TrackHLS *DataHLS::tracksLRHLS() const {
+const array_t<TrackHLS> &DataHLS::tracksLRHLS() const {
     return tracksLRHLS_;
 }
 

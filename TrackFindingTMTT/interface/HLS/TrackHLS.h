@@ -28,7 +28,7 @@ public:
 
     ~TrackHLS() {}
 
-    const StubHLS *stubs() const;
+    const array_s<StubHLS> &stubs() const;
     dtf_t qOverPt() const;
     dtf_t phi() const;
     dtf_t cot() const;
@@ -39,7 +39,7 @@ public:
 
 public:
 
-StubHLS stubs_[12];
+array_s<StubHLS> stubs_;
 dtf_t qOverPt_;
 dtf_t phi_;
 dtf_t cot_;

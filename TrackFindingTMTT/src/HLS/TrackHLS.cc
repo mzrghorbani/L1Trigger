@@ -16,7 +16,7 @@ namespace HLS {
 
 TrackHLS::TrackHLS() : qOverPt_(0), phi_(0), cot_(0), z_(0), valid_(false) {}
 
-const StubHLS *TrackHLS::stubs() const {
+const array_s<StubHLS> &TrackHLS::stubs() const {
     return stubs_;
 }
 
