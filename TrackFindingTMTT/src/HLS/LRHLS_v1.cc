@@ -5,9 +5,7 @@ Created by Maziar Ghorbani - Brunel University on 12/06/19.
 #ifdef CMSSW_GIT_HASH
 #include "L1Trigger/TrackFindingTMTT/interface/HLS/LRHLS_v1.h"
 #else
-
 #include "LRHLS_v1.h"
-
 #endif
 
 #ifdef CMSSW_GIT_HASH
@@ -60,7 +58,7 @@ void LRHLS_v1::produce() {
         return;
     }
 
-    uint4_t maxIterations = 10;
+    uint4_t maxIterations = 12;
 
     for (i = 0; i < maxIterations; i++) {
 
@@ -134,6 +132,7 @@ void LRHLS_v1::initFit() {
 
     for (i = 0; i < 7; i++)
         nLayers_ += nLayers[i];
+
 }
 
 bool LRHLS_v1::checkValidity() {
@@ -229,70 +228,81 @@ void LRHLS_v1::calcHelix() {
         }
     }
 
-    sumData phiSum[7];
+    sumData phiSums, zSums;
 
-    for (i = 0; i < 7; i++) {
-        if (layerPopulation_[i] > 0) {
-            phiSum[i].n++;
-            phiSum[i].xy += dtf_t(layerPos_[i].RPhi * layerPos_[i].Phi);
-            phiSum[i].x += layerPos_[i].RPhi;
-            phiSum[i].y += layerPos_[i].Phi;
-            phiSum[i].xx += dtf_t(layerPos_[i].RPhi * layerPos_[i].RPhi);
-        }
+    for(i = 0; i < 7; i++) {
+    	phiSums += make_pair_t(layerPos_[i].RPhi, layerPos_[i].Phi);
     }
 
-    sumData zSum[7];
-
-    for (i = 0; i < 7; i++) {
-        if (layerPopulation_[i] > 0) {
-            zSum[i].n++;
-            zSum[i].xy += dtf_t(layerPos_[i].RZ * layerPos_[i].Z);
-            zSum[i].x += layerPos_[i].RZ;
-            zSum[i].y += layerPos_[i].Z;
-            zSum[i].xx += dtf_t(layerPos_[i].RZ * layerPos_[i].RZ);
-        }
+    for(i = 0; i < 7; i++) {
+    	zSums += make_pair_t(layerPos_[i].RZ, layerPos_[i].Z);
     }
 
-    sumData phiSums;
+    const pair_t<dtf_t,dtf_t>& phiParameter = phiSums.calcLinearParameter();
 
-    for (i = 0; i < 7; i++) {
-        phiSums.n += phiSum[i].n;
-        phiSums.xy += phiSum[i].xy;
-        phiSums.x += phiSum[i].x;
-        phiSums.y += phiSum[i].y;
-        phiSums.xx += phiSum[i].xx;
-    }
+    const pair_t<dtf_t,dtf_t>& zParameter = zSums.calcLinearParameter();
 
-    sumData zSums;
+    LRParameter_ = LRTrack(phiParameter.first, phiParameter.second, zParameter.first, zParameter.second);
 
-    for (i = 0; i < 7; i++) {
-        zSums.n += zSum[i].n;
-        zSums.xy += zSum[i].xy;
-        zSums.x += zSum[i].x;
-        zSums.y += zSum[i].y;
-        zSums.xx += zSum[i].xx;
-    }
-
-    dtf_t temp1 = dtf_t(phiSums.n * phiSums.xy - phiSums.x * phiSums.y);
-    dtf_t temp2 = dtf_t(phiSums.y * phiSums.xx - phiSums.x * phiSums.xy);
-    dtf_t temp3 = dtf_t(phiSums.n * phiSums.xx - phiSums.x * phiSums.x);
-
-    pair_t<dtf_t, dtf_t> phiParameter;
-    phiParameter.first = dtf_t(temp1 / temp3);
-    phiParameter.second = dtf_t(temp2 / temp3);
-
-    dtf_t temp4 = dtf_t(zSums.n * zSums.xy - zSums.x * zSums.y);
-    dtf_t temp5 = dtf_t(zSums.y * zSums.xx - zSums.x * zSums.xy);
-    dtf_t temp6 = dtf_t(zSums.n * zSums.xx - zSums.x * zSums.x);
-
-    pair_t<dtf_t, dtf_t> zParameter;
-    zParameter.first = dtf_t(temp4 / temp6);
-    zParameter.second = dtf_t(temp5 / temp6);
-
-    LRParameter_.qOverPt = phiParameter.first;
-    LRParameter_.phiT = phiParameter.second;
-    LRParameter_.cotTheta = zParameter.first;
-    LRParameter_.zT = zParameter.second;
+//    sumData phiSum[7];
+//
+//    for (i = 0; i < 7; i++) {
+//        if (layerPopulation_[i] > 0) {
+//            phiSum[i].n++;
+//            phiSum[i].xy += dtf_t(layerPos_[i].RPhi * layerPos_[i].Phi);
+//            phiSum[i].x += layerPos_[i].RPhi;
+//            phiSum[i].y += layerPos_[i].Phi;
+//            phiSum[i].xx += dtf_t(layerPos_[i].RPhi * layerPos_[i].RPhi);
+//        }
+//    }
+//
+//    sumData zSum[7];
+//
+//    for (i = 0; i < 7; i++) {
+//        if (layerPopulation_[i] > 0) {
+//            zSum[i].n++;
+//            zSum[i].xy += dtf_t(layerPos_[i].RZ * layerPos_[i].Z);
+//            zSum[i].x += layerPos_[i].RZ;
+//            zSum[i].y += layerPos_[i].Z;
+//            zSum[i].xx += dtf_t(layerPos_[i].RZ * layerPos_[i].RZ);
+//        }
+//    }
+//
+//    sumData phiSums;
+//
+//    for (i = 0; i < 7; i++) {
+//        phiSums.n += phiSum[i].n;
+//        phiSums.xy += phiSum[i].xy;
+//        phiSums.x += phiSum[i].x;
+//        phiSums.y += phiSum[i].y;
+//        phiSums.xx += phiSum[i].xx;
+//    }
+//
+//    sumData zSums;
+//
+//    for (i = 0; i < 7; i++) {
+//        zSums.n += zSum[i].n;
+//        zSums.xy += zSum[i].xy;
+//        zSums.x += zSum[i].x;
+//        zSums.y += zSum[i].y;
+//        zSums.xx += zSum[i].xx;
+//    }
+//
+//    dtf_t temp1 = dtf_t(phiSums.n * phiSums.xy - phiSums.x * phiSums.y);
+//    dtf_t temp2 = dtf_t(phiSums.y * phiSums.xx - phiSums.x * phiSums.xy);
+//    dtf_t temp3 = dtf_t(phiSums.n * phiSums.xx - phiSums.x * phiSums.x);
+//
+//    pair_t<dtf_t, dtf_t> phiParameter;
+//    phiParameter.first = dtf_t(temp1 / temp3);
+//    phiParameter.second = dtf_t(temp2 / temp3);
+//
+//    dtf_t temp4 = dtf_t(zSums.n * zSums.xy - zSums.x * zSums.y);
+//    dtf_t temp5 = dtf_t(zSums.y * zSums.xx - zSums.x * zSums.xy);
+//    dtf_t temp6 = dtf_t(zSums.n * zSums.xx - zSums.x * zSums.x);
+//
+//    pair_t<dtf_t, dtf_t> zParameter;
+//    zParameter.first = dtf_t(temp4 / temp6);
+//    zParameter.second = dtf_t(temp5 / temp6);
 
 }
 
@@ -355,7 +365,7 @@ bool LRHLS_v1::killLargestResid() {
     bool layerCritical = false;
     bool single = true;
 
-    if (nStubs_ <= 4)
+    if (nStubs_ == 2)
         stubCritical = true;
 
     if(nLayers_ == 2)
