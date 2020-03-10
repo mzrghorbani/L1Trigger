@@ -2,10 +2,13 @@
 Created by Maziar Ghorbani - Brunel University on 12/06/19.
 */
 
+#ifdef CMSSW_GIT_HASH
 #include "L1Trigger/TrackFindingTMTT/interface/HLS/LRHLS.h"
+#else
+#include "LRHLS.h"
+#endif
 
-using namespace TMTT;
-using namespace HLS;
+namespace TMTT {
 
 LRHLS::LRHLS(Settings *settings, Data *data) : settings_(settings), data_(data) {
 
@@ -13,50 +16,35 @@ LRHLS::LRHLS(Settings *settings, Data *data) : settings_(settings), data_(data) 
 
 void LRHLS::produce() {
 
-    data_->tracksLRHLS().clear();
-
     for (auto trackMHT : data_->tracksMHT()) {
 
-      Track *trackLR = new Track();
-      DataHLS *dataHLS = new DataHLS();
-      int k = 0;
+        auto *trackLR = new Track();
 
-      for (auto stubMHT : trackMHT->stubs()) {
+        for (auto stubMHT : trackMHT->stubs()) {
 
-        StubHLS *stubIn = new StubHLS();
-        Stub *stubOut = new Stub();
+            auto *stubIn = new TMTT::HLS::StubHLS();
+            auto *stubOut = new TMTT::HLS::StubHLS();
 
-        stubIn->r_ = stubMHT->r();
-        stubIn->phi_ = stubMHT->phi();
-        stubIn->z_ = stubMHT->z();
-        stubIn->layerId_ = stubMHT->layerId();
-        stubIn->valid_ = stubMHT->valid();
+            stubIn->r_ = stubMHT->r();
+            stubIn->phi_ = stubMHT->phi();
+            stubIn->z_ = stubMHT->z();
+            stubIn->layerId_ = stubMHT->layerId();
+            stubIn->valid_ = stubMHT->valid();
 
-        dataHLS->stubsMHT_[k] = *stubIn;
-        k++;
+            TMTT::HLS::LRHLS_top(stubIn, stubOut);
 
-        if(k == trackMHT->size())
-          TMTT::HLS::LRHLS_top(dataHLS);
-        else
-          continue;
+            Stub *stubLR = new Stub();
+            stubLR->r_ = stubOut->r();
+            stubLR->phi_ = stubOut->phi();
+            stubLR->z_ = stubOut->z();
+            stubLR->layerId_ = stubOut->layerId();
+            stubLR->valid_ = stubOut->valid();
 
-        int i;
-        for(i = 0; i < 12; i++) {
-          if(dataHLS->stubsLR_[i].valid()) {
-
-            stubOut->r_ = dataHLS->stubsLR_[i].r();
-            stubOut->phi_ = dataHLS->stubsLR_[i].phi();
-            stubOut->z_ = dataHLS->stubsLR_[i].z();
-            stubOut->layerId_ = dataHLS->stubsLR_[i].layerId();
-            stubOut->valid_ = dataHLS->stubsLR_[i].valid();
-
-            trackLR->stubs_.push_back(stubOut);
-          }
+            trackLR->stubs_.push_back(stubLR);
         }
-      }
-
-      data_->tracksLRHLS_.push_back(trackLR);
+        data_->tracksLRHLS_.push_back(trackLR);
     }
+}
 
    // for (auto track : data_->tracksLRHLS()) {
    //          std::cout << track->size() << std::endl;

@@ -5,12 +5,21 @@ Created by Maziar Ghorbani - Brunel University on 12/06/19.
 #ifndef __LRHLS_H__
 #define __LRHLS_H__
 
+#ifdef CMSSW_GIT_HASH
 #include "L1Trigger/TrackFindingTMTT/interface/Settings.h"
 #include "L1Trigger/TrackFindingTMTT/interface/Data.h"
 #include "L1Trigger/TrackFindingTMTT/interface/Track.h"
 #include "L1Trigger/TrackFindingTMTT/interface/Stub.h"
 #include "L1Trigger/TrackFindingTMTT/interface/HLS/StubHLS.h"
 #include "L1Trigger/TrackFindingTMTT/interface/HLS/LRHLS_top.h"
+#else
+#include "Settings.h"
+#include "Data.h"
+#include "Track.h"
+#include "Stub.h"
+#include "StubHLS.h"
+#include "LRHLS_top.h"
+#endif
 
 namespace TMTT {
 
@@ -20,7 +29,7 @@ public:
 
     LRHLS(Settings *settings, Data *data);
 
-    ~LRHLS(){}
+    ~LRHLS() {}
 
     void produce();
 

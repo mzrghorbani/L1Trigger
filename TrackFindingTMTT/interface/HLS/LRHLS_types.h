@@ -31,12 +31,12 @@ enum {
 };
 
 // Fixed-point variables used in HW
-typedef ap_uint<B1> uint1_t;
-typedef ap_uint<B3> uint3_t;
-typedef ap_uint<B4> uint4_t;
-typedef ap_int<B13> int13_t;
-typedef ap_int<B14> int14_t;
-typedef ap_fixed<WB,IB> dtf_t;
+//typedef ap_uint<B1> uint1_t;
+//typedef ap_uint<B3> uint3_t;
+//typedef ap_uint<B4> uint4_t;
+//typedef ap_int<B13> int13_t;
+//typedef ap_int<B14> int14_t;
+//typedef ap_fixed<WB,IB> dtf_t;
 
 // Fixed-point variables used in SW
 //typedef ap_uint<B1> uint1_t;
@@ -47,12 +47,12 @@ typedef ap_fixed<WB,IB> dtf_t;
 //typedef ap_fixed<WB+IB,IB+IB> dtf_t;
 
 // Fixed-point variables used in Tests
-//typedef float int13_t;
-//typedef float int14_t;
-//typedef int uint4_t;
-//typedef int uint3_t;
-//typedef bool uint1_t;
-//typedef float dtf_t;
+typedef float int13_t;
+typedef float int14_t;
+typedef int uint4_t;
+typedef int uint3_t;
+typedef bool uint1_t;
+typedef float dtf_t;
 
 template<typename T>
 T abs_t(const T &a) {
@@ -117,6 +117,9 @@ struct LRTrack {
     dtf_t phiT = 0;
     dtf_t cotTheta = 0;
     dtf_t zT = 0;
+
+    LRTrack(dtf_t qOverPt = 0, dtf_t phiT = 0, dtf_t cotTheta = 0, dtf_t zT = 0)
+    	: qOverPt(qOverPt), phiT(phiT), cotTheta(cotTheta), zT(zT) {}
 };
 
 struct stubData {
@@ -199,7 +202,14 @@ struct residData {
     dtf_t z = 0;
     uint3_t layerId = 0;
     uint4_t stubId = 0;
-    uint1_t valid = false;
+    bool valid = false;
+
+    residData() : phi(0), z(0), layerId(0), stubId(0), valid(false) {}
+
+    residData(dtf_t x) : phi(x), z(x), layerId(0), stubId(0), valid(false) {}
+
+    residData(const dtf_t& phi, const dtf_t& z, const uint3_t& layerId, const uint4_t& stubId, const bool& valid)
+    	: phi(phi), z(z), layerId(layerId), stubId(stubId), valid(false) {}
 
     dtf_t combined() const {
         return (phi + z);
