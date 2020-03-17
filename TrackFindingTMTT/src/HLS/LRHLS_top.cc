@@ -14,10 +14,11 @@ namespace TMTT {
 namespace HLS {
 #endif
 
-void LRHLS_top(StubHLS& stubIn, StubHLS& stubOut) {
+void LRHLS_top(StubHLS indata[WIN_LEN], StubHLS outdata[WIN_LEN]) {
 
-    LRHLS_v3 lrhlsV3(stubIn, stubOut);
+	LRHLS_v4<StubHLS, WIN_LEN, LAYERS> lrhlsV4;
 
+	lrhlsV4.produce(indata, outdata);
 }
 
 #ifdef CMSSW_GIT_HASH
