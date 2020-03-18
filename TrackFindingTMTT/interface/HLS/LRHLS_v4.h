@@ -44,7 +44,7 @@ public:
 
         bool single = true;
 
-		while(true) {
+		produce_label0:while(true) {
 
 			single = true;
 
