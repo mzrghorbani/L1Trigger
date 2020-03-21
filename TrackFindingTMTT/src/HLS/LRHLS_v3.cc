@@ -14,107 +14,79 @@ namespace TMTT {
 namespace HLS {
 #endif
 
-LRHLS_v3::LRHLS_v3(StubHLS& stubIn, StubHLS& stubOut) {
+LRHLS_v3::LRHLS_v3() {
 
-	static unsigned int counter = 0;
+}
 
-	static StubHLS stubs_[10];
+void LRHLS_v3::produce(StubHLS &stubIn, StubHLS &stubOut) {
 
-	for(unsigned int i = 9; i > 0; i--)
-		stubs_[i] = stubs_[i-1];
-	stubs_[0] = stubIn;
+	StubHLS temp = stubIn;
 
-	counter++;
+	static stubData layerMinPos(4096, 4096, 4096, 4096);
+	static stubData layerMaxPos(-4096, -4096, -4096, -4096);
+	static residData largestResid_ = residData(-1.);
 
-	do {
+	static dtf_t xyp = 0;
+	static dtf_t xp = 0;
+	static dtf_t yp = 0;
+	static dtf_t xxp = 0;
 
-	//initFit
+	static dtf_t xyz = 0;
+	static dtf_t xz = 0;
+	static dtf_t yz = 0;
+	static dtf_t xxz = 0;
 
-	bool single;
+	stubData layerPos;
 
-	unsigned int layerPopulation_[7];
+	dtf_t denominator = 0;
+	dtf_t slope = 0;
+	dtf_t intercept = 0;
 
-	for(unsigned int i = 0; i < 7; i++)
-		layerPopulation_[i] = 0;
+	if(temp.valid()) {
 
-	unsigned int nStubs_ = 0;
+		stubData pos(temp.r() ,temp.phi() ,temp.r(), temp.z());
 
-	for(unsigned int i = 0; i < 10; i++)
-		if(stubs_[i].valid()) {
-			layerPopulation_[stubs_[i].layerId()]++;
-			nStubs_++;
+		layerMinPos <= pos;
+		layerMaxPos >= pos;
+		layerPos = layerMinPos + layerMaxPos;
+		layerPos /= 2;
+
+		xyp += dtf_t(layerPos.RPhi * layerPos.Phi);
+		xp += layerPos.RPhi;
+		yp += layerPos.Phi;
+		xxp += dtf_t(layerPos.RPhi * layerPos.RPhi);
+
+		denominator = dtf_t(2 * xxp - xp * xp);
+		slope = dtf_t(dtf_t(2 * xyp - xp * yp) / denominator);
+		intercept = dtf_t(dtf_t(yp * xxp - xp * xyp) / denominator);
+
+		pair_t<dtf_t,dtf_t> phiParameter = make_pair_t(slope, intercept);
+
+		xyz += dtf_t(layerPos.RZ * layerPos.Z);
+		xz += layerPos.RZ;
+		yz += layerPos.Z;
+		xxz += dtf_t(pos.RZ * pos.RZ);
+
+		denominator = dtf_t(2 * xxz - xz * xz);
+		slope = dtf_t(dtf_t(2 * xyz - xz * yz) / denominator);
+		intercept = dtf_t(dtf_t(yz * xxz - xz * xyz) / denominator);
+
+		pair_t<dtf_t,dtf_t> zParameter = make_pair_t(slope, intercept);
+
+		LRTrack LRParameter_(phiParameter.first, phiParameter.second, zParameter.first, zParameter.second);
+
+		float phiResid = pos.Phi - (LRParameter_.phiT + dtf_t(LRParameter_.qOverPt * pos.RPhi));
+		float zResid = pos.Z - (LRParameter_.zT + dtf_t(LRParameter_.cotTheta * pos.RZ));
+
+		residData resid(abs_t(phiResid), abs_t(zResid), 0, 0, true);
+
+		if(resid.combined() > largestResid_.combined()) {
+			largestResid_ = resid;
+			temp.valid_ = false;
 		}
 
-		single = true;
-
-		for(unsigned int i = 0; i < 7; i++)
-			if(layerPopulation_[i] > 1)
-				single = false;
-
-		if((nStubs_ < 5) && (single == true))
-			break;
-
-		//calcHelix
-
-		sumData phiSums, zSums;
-
-		for(unsigned int i = 0; i < 10; i++) {
-			if(stubs_[i].valid()) {
-
-				StubHLS stub = stubs_[i];
-
-				stubData layerMinPos(4096, 4096, 4096, 4096);
-				stubData layerMaxPos(-4096, -4096, -4096, -4096);
-
-				stubData layerPos(0, 0, 0, 0);
-
-				stubData pos(stub.r(), stub.phi(), stub.r(), stub.z());
-
-				layerMinPos <= pos;
-				layerMaxPos >= pos;
-				layerPos = layerMinPos + layerMaxPos;
-				layerPos /= 2;
-
-				phiSums += make_pair_t(layerPos.RPhi, layerPos.Phi);
-				zSums += make_pair_t(layerPos.RZ, layerPos.Z);
-			}
-		}
-
-		const pair_t<dtf_t,dtf_t>& phiParameter = phiSums.calcLinearParameter();
-		const pair_t<dtf_t,dtf_t>& zParameter = zSums.calcLinearParameter();
-
-		LRParameter_ = LRTrack(phiParameter.first, phiParameter.second, zParameter.first, zParameter.second);
-
-		// calcResidual
-
-		residData largestResid_ = residData(-1.);
-
-		for(unsigned int i = 0; i < 10; i++) {
-			if(stubs_[i].valid()) {
-
-				StubHLS stub = stubs_[i];
-
-				stubData pos(stub.r(), stub.phi(), stub.r(), stub.z());
-
-				float phiResid = pos.Phi - (LRParameter_.phiT + LRParameter_.qOverPt * pos.RPhi);
-				float zResid = pos.Z - (LRParameter_.zT + LRParameter_.cotTheta * pos.RZ);
-
-				residData resid(abs_t(phiResid), abs_t(zResid), stub.layerId(), i, true);
-
-				if(resid.combined() > largestResid_.combined())
-					largestResid_ = resid;
-			}
-		}
-
-		 //killLargestResidual
-
-		stubs_[largestResid_.stubId].valid_ = false;
-		layerPopulation_[largestResid_.layerId]--;
-		nStubs_--;
-
-	} while((counter % 10) == 0);
-
-	stubOut = stubs_[9];
+		stubOut = temp;
+	}
 }
 
 #ifdef CMSSW_GIT_HASH

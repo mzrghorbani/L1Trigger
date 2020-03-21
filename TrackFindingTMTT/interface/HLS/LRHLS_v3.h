@@ -23,12 +23,13 @@ class LRHLS_v3 {
 
 public:
 
-    LRHLS_v3(StubHLS& stubIn, StubHLS& stubOut);
+    LRHLS_v3();
+
+    void produce(StubHLS &stubIn, StubHLS &stubOut);
+
     ~LRHLS_v3(){}
 
 public:
-
-    LRTrack LRParameter_;
 
 };
 

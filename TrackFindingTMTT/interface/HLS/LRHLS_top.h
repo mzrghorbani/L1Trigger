@@ -21,7 +21,7 @@ namespace TMTT {
 namespace HLS {
 #endif
 
-void LRHLS_top(StubHLS& stubIn, StubHLS& stubOut);
+void LRHLS_top(StubHLS &stubIn, StubHLS &stubOut);
 
 #ifdef CMSSW_GIT_HASH
 }

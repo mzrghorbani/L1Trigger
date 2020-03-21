@@ -14,9 +14,11 @@ namespace TMTT {
 namespace HLS {
 #endif
 
-void LRHLS_top(StubHLS& stubIn, StubHLS& stubOut) {
+void LRHLS_top(StubHLS &stubIn, StubHLS &stubOut) {
 
-    LRHLS_v3 lrhlsV3(stubIn, stubOut);
+    LRHLS_v3 lrhlsV3;
+
+    lrhlsV3.produce(stubIn, stubOut);
 
 }
 

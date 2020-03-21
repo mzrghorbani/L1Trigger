@@ -17,6 +17,8 @@
 #include <cmath>
 #endif
 
+#define WIN_LEN 10
+
 #ifdef CMSSW_GIT_HASH
 namespace TMTT {
 
