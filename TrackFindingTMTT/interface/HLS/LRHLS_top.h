@@ -17,6 +17,7 @@ Created by Maziar Ghorbani - Brunel University on 12/06/19.
 
 #define WIN_LEN 12
 #define LAYERS 7
+#define LIMIT 4
 
 #ifdef CMSSW_GIT_HASH
 namespace TMTT {
