@@ -14,13 +14,11 @@ namespace TMTT {
 namespace HLS {
 #endif
 
-void LRHLS_top(StubHLS indata[WIN_LEN], StubHLS outdata[WIN_LEN]) {
-#pragma HLS INTERFACE ap_fifo port=outdata
-#pragma HLS INTERFACE ap_fifo port=indata
+void LRHLS_top(T& indata, T& outdata) {
 
-	LRHLS_v4<StubHLS,WIN_LEN,LAYERS,LIMIT> lrhlsV4;
+	LRHLS_v5<T, WIN_LEN, LAYERS, LIMIT> lrhlsV5;
 
-	lrhlsV4.produce(indata, outdata);
+	lrhlsV5.produce(indata, outdata);
 }
 
 #ifdef CMSSW_GIT_HASH
