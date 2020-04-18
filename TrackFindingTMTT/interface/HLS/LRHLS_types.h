@@ -27,7 +27,7 @@ enum {
     B14 = 14, B13 = 13, B4 = 4, B3 = 3, B1 = 1
 };
 enum {
-    WB = 31, IB = 21, FB = WB - IB
+    WB = 32, IB = 21, FB = WB - IB
 };
 
 // Fixed-point variables used in HW
@@ -36,7 +36,7 @@ typedef ap_uint<B3> uint3_t;
 typedef ap_uint<B4> uint4_t;
 typedef ap_int<B13> int13_t;
 typedef ap_int<B14> int14_t;
-//typedef ap_fixed<WB,IB> dtf_t;
+typedef ap_fixed<WB,IB> dtf_t;
 
 // Fixed-point variables used in SW
 //typedef ap_uint<B1> uint1_t;
@@ -47,12 +47,12 @@ typedef ap_int<B14> int14_t;
 //typedef ap_fixed<WB+IB,IB+IB> dtf_t;
 
 // Fixed-point variables used in Tests
-//typedef float int13_t;
-//typedef float int14_t;
+//typedef int int13_t;
+//typedef int int14_t;
 //typedef int uint4_t;
 //typedef int uint3_t;
 //typedef bool uint1_t;
-typedef float dtf_t;
+//typedef float dtf_t;
 
 template<typename T>
 T abs_t(const T &a) {
@@ -61,15 +61,15 @@ T abs_t(const T &a) {
     return a;
 }
 
-template<class T>
-const T &min_t(const T &a, const T &b) {
+template<typename T>
+T min_t(const T &a, const T &b) {
     if (a < b)
         return a;
     return b;
 }
 
-template<class T>
-const T &max_t(const T &a, const T &b) {
+template<typename T>
+T max_t(const T &a, const T &b) {
     if (a > b)
         return a;
     return b;
@@ -86,6 +86,20 @@ struct pair_t {
 template<typename T1, typename T2>
 pair_t<T1, T2> make_pair_t(const T1 &a, const T2 &b) {
     return (pair_t<T1, T2>(a, b));
+}
+
+template<typename T1, typename T2>
+pair_t<T1, T2> calcFit(dtf_t n, T1 x, T2 y) {
+	dtf_t xy = x * y;
+	dtf_t nxy = n * xy;
+	dtf_t yy = y * y;
+	dtf_t nyy = n * yy;
+	dtf_t xx = x * x;
+	dtf_t nxy_xy = nxy - xy;
+	dtf_t nyy_xx = nyy - xx;
+	dtf_t slope = nxy_xy / nyy_xx;
+	dtf_t intercept = y - slope * x;
+	return make_pair_t(slope, intercept);
 }
 
 template<typename T>

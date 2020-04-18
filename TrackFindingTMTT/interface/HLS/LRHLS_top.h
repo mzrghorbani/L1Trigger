@@ -17,7 +17,7 @@ Created by Maziar Ghorbani - Brunel University on 12/06/19.
 
 typedef StubHLS T;
 
-#define WIN_LEN 7
+#define WIN_LEN 10
 #define LAYERS 7
 #define LIMIT 4
 
@@ -27,7 +27,7 @@ namespace TMTT {
 namespace HLS {
 #endif
 
-void LRHLS_top(T& indata, T& outdata);
+void LRHLS_top(int13_t r[10], int14_t phi[10], int14_t z[10], uint3_t layerId[10], bool valid[10]);
 
 #ifdef CMSSW_GIT_HASH
 }
