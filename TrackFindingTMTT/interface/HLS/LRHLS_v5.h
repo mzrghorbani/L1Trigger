@@ -19,7 +19,7 @@ namespace TMTT {
 namespace HLS {
 #endif
 
-template<class T, int SZ, int LAYERS, int LIMIT>
+template<int SZ, int LAYERS, int LIMIT>
 class LRHLS_v5 {
 public:
 
@@ -27,7 +27,7 @@ public:
 
 	~LRHLS_v5() {}
 
-	void produce(int13_t r[SZ], int14_t phi[SZ], int14_t z[SZ], uint3_t layerId[SZ], bool valid[SZ]);
+	void produce(const int13_t* r, const int14_t* phi, const int14_t* z, const uint3_t* layerId, uint1_t* valid);
 
 public:
 
@@ -35,160 +35,38 @@ public:
 
 };
 
-template<class T, int SZ, int LAYERS, int LIMIT>
-void LRHLS_v5<T, SZ, LAYERS, LIMIT>::produce(int13_t r[SZ], int14_t phi[SZ], int14_t z[SZ], uint3_t layerId[SZ], bool valid[SZ]) {
-
-	dtf_t r_tmp[SZ];
-	dtf_t phi_tmp[SZ];
-	dtf_t z_tmp[SZ];
-
-	for(int i = 0; i < SZ; i++) {
-		r_tmp[i] = dtf_t(r[i]) >> 1;
-		phi_tmp[i] = dtf_t(phi[i]) >> 1;
-		z_tmp[i] = dtf_t(z[i]) >> 1;
-	}
-
-	dtf_t rSum = 0;
-	dtf_t phiSum = 0;
-	dtf_t zSum = 0;
-
-    dtf_t layerMinPos = 0;
-    dtf_t layerMaxPos = 0;
-    dtf_t layerPos = 0;
-
-    dtf_t n = 0;
-
-    dtf_t largestResid = 0;
-
-    uint4_t idx = 0;
+template<int SZ, int LAYERS, int LIMIT>
+void LRHLS_v5<SZ, LAYERS, LIMIT>::produce(const int13_t* r, const int14_t* phi, const int14_t* z, const uint3_t* layerId, uint1_t* valid) {
 
     uint4_t nStubs = SZ;
 
-    bool single = false;
-
-    dtf_t residuals[SZ];
-
-	for(int i = 0; i < LAYERS; i++) {
+	for(int i = 0; i < LAYERS; i++)
 		population_[i] = 0;
-	}
 
-	for(int i = 0; i < SZ; i++) {
-		population_[layerId[i]] += 1;
-	}
+	for(int i = 0; i < SZ; i++)
+		population_[*(layerId+i)] += 1;
 
-	for(int k = 0; k < 10; k++) {
+	while(true) {
 
-		single = true;
+		if((exit_t(population_, LAYERS)) && (nStubs <= LIMIT))
+			break;
 
-		for(int i = 0; i < 7; i++) {
-			if(population_[i] > 1) {
-				single = false;
-			}
-		}
+		uint3_t layers = foundLayers(population_, LAYERS);
 
-		if((single == true) && (nStubs <= LIMIT)) break;
+		dtf_t rSum = sums(r, layerId, valid, SZ, LAYERS);
+		dtf_t phiSum = sums(phi, layerId, valid, SZ, LAYERS);
+		dtf_t zSum = sums(z, layerId, valid, SZ, LAYERS);
 
-	    for(int i = 0; i < LAYERS; i++) {
-	       if(population_[i] > 0) {
-	           n += 1;
-	       }
-	    }
+        dtf_t sp = slope(layers, rSum, phiSum);
+        dtf_t ip = intercept(layers, phiSum, sp, rSum);
 
-        for(int i = 0; i < LAYERS; i++) {
-            layerMinPos = 8191;
-            layerMaxPos = -8192;
-            layerPos = 0;
-            for(int j = 0; j < SZ; j++) {
-                if(valid[j]) {
-                	dtf_t tmp = r_tmp[j];
-                    if(layerId[j] == i) {
-                        layerMinPos = min_t(layerMinPos, tmp);
-                        layerMaxPos = max_t(layerMaxPos, tmp);
-                        layerPos = layerMinPos + layerMaxPos;
-                        layerPos >>= 2;
-//                        layerPos /= 2;
-            		}
-        		}
-			}
-            rSum += layerPos;
-		}
+        dtf_t sz = slope(layers, rSum, zSum);
+        dtf_t iz = intercept(layers, zSum, sz, rSum);
 
-        for(int i = 0; i < LAYERS; i++) {
-            layerMinPos = 8191;
-            layerMaxPos = -8192;
-            layerPos = 0;
-            for(int j = 0; j < SZ; j++) {
-                if(valid[j]) {
-                	dtf_t tmp = phi_tmp[j];
-                    if(layerId[j] == i) {
-                        layerMinPos = min_t(layerMinPos, tmp);
-                        layerMaxPos = max_t(layerMaxPos, tmp);
-                        layerPos = layerMinPos + layerMaxPos;
-                        layerPos >>= 2;
-//                        layerPos /= 2;
-            		}
-        		}
-			}
-            phiSum += layerPos;
-		}
+        uint4_t idx = largestResid(r, phi, z, valid, sp, ip, sz, iz, SZ, LAYERS);
 
-        for(int i = 0; i < LAYERS; i++) {
-            layerMinPos = 8191;
-            layerMaxPos = -8192;
-            layerPos = 0;
-            for(int j = 0; j < SZ; j++) {
-                if(valid[j]) {
-                	dtf_t tmp = z_tmp[j];
-                    if(layerId[j] == i) {
-                        layerMinPos = min_t(layerMinPos, tmp);
-                        layerMaxPos = max_t(layerMaxPos, tmp);
-                        layerPos = layerMinPos + layerMaxPos;
-                        layerPos >>= 2;
-//                        layerPos /= 2;
-            		}
-        		}
-			}
-            zSum += layerPos;
-		}
+        killLargestResid(population_, layerId, valid, idx);
 
-//        pair_t<dtf_t,dtf_t> rphi = calcFit(n, rSum, phiSum);
-//        pair_t<dtf_t,dtf_t> rz = calcFit(n, rSum, zSum);
-
-        dtf_t sp = (n * (rSum * phiSum) - (rSum * phiSum)) / (n * (phiSum * phiSum) - (rSum * rSum));
-        dtf_t ip = (phiSum - sp * rSum) / n;
-
-        dtf_t sz = (n * (rSum * zSum) - (rSum * zSum)) / (n * (zSum * zSum) - (rSum * rSum));
-        dtf_t iz = (zSum - sz * rSum) / n;
-
-        for(int i = 0; i < SZ; i++) {
-        	residuals[i] = 0;
-        }
-
-        for(int i = 0; i < SZ; i++) {
-            if(valid[i]) {
-//                dtf_t phi_resid = phi[i] - (rphi.first * r[i] + rphi.second);
-//                dtf_t z_resid = z[i] - (rz.first * r[i] + rz.second);
-                dtf_t phi_resid = phi[i] - (sp * r[i] + ip);
-                dtf_t z_resid = z[i] - (sz * r[i] + iz);
-
-                residuals[i] = abs_t(phi_resid + z_resid);
-            }
-        }
-
-        largestResid = residuals[0];
-
-        for(int i = 0; i < SZ; i++) {
-        	if(valid[i]) {
-				if(residuals[i] > largestResid) {
-					largestResid = residuals[i];
-					idx = i;
-				}
-        	}
-        }
-
-        valid[idx] = false;
-
-        population_[layerId[idx]] -= 1;
         nStubs -= 1;
 	}
 }

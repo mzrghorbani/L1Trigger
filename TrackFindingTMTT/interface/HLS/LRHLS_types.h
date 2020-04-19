@@ -27,8 +27,16 @@ enum {
     B14 = 14, B13 = 13, B4 = 4, B3 = 3, B1 = 1
 };
 enum {
-    WB = 32, IB = 21, FB = WB - IB
+    WB = 32, IB = 27, FB = WB - IB
 };
+
+// Native variables used in SW
+//typedef int int13_t;
+//typedef int int14_t;
+//typedef int uint4_t;
+//typedef int uint3_t;
+//typedef bool uint1_t;
+//typedef float dtf_t;
 
 // Fixed-point variables used in HW
 typedef ap_uint<B1> uint1_t;
@@ -37,22 +45,6 @@ typedef ap_uint<B4> uint4_t;
 typedef ap_int<B13> int13_t;
 typedef ap_int<B14> int14_t;
 typedef ap_fixed<WB,IB> dtf_t;
-
-// Fixed-point variables used in SW
-//typedef ap_uint<B1> uint1_t;
-//typedef ap_uint<B3> uint3_t;
-//typedef ap_uint<B4> uint4_t;
-//typedef ap_fixed<WB,B13> int13_t;
-//typedef ap_fixed<WB,B14> int14_t;
-//typedef ap_fixed<WB+IB,IB+IB> dtf_t;
-
-// Fixed-point variables used in Tests
-//typedef int int13_t;
-//typedef int int14_t;
-//typedef int uint4_t;
-//typedef int uint3_t;
-//typedef bool uint1_t;
-//typedef float dtf_t;
 
 template<typename T>
 T abs_t(const T &a) {
@@ -75,267 +67,104 @@ T max_t(const T &a, const T &b) {
     return b;
 }
 
-template<typename T1, typename T2>
-struct pair_t {
-    T1 first;
-    T2 second;
-    pair_t() : first(0), second(0) {}
-    pair_t(const T1 &a, const T2 &b) : first(a), second(b) {}
-};
-
-template<typename T1, typename T2>
-pair_t<T1, T2> make_pair_t(const T1 &a, const T2 &b) {
-    return (pair_t<T1, T2>(a, b));
+template<typename T>
+dtf_t sums(const T* r, const uint3_t* layerId, const uint1_t* valid, int SZ, int LAYERS) {
+	dtf_t out = 0;
+	for(int i = 0; i < LAYERS; i++) {
+		dtf_t layerMinPos = 8191;
+		dtf_t layerMaxPos = -8192;
+		dtf_t layerPos = 0;
+		for(int j = 0; j < SZ; j++) {
+			if(*(valid+j)) {
+				dtf_t tmp = *(r+j);
+				if(*(layerId+j) == i) {
+					layerMinPos = min_t(layerMinPos, tmp);
+					layerMaxPos = max_t(layerMaxPos, tmp);
+					layerPos = dtf_t(layerMinPos + layerMaxPos);
+					layerPos = dtf_t(layerPos >> 2);
+				}
+			}
+		}
+		out = dtf_t(out + layerPos);
+	}
+	return out;
 }
 
 template<typename T1, typename T2>
-pair_t<T1, T2> calcFit(dtf_t n, T1 x, T2 y) {
-	dtf_t xy = x * y;
-	dtf_t nxy = n * xy;
-	dtf_t yy = y * y;
-	dtf_t nyy = n * yy;
-	dtf_t xx = x * x;
-	dtf_t nxy_xy = nxy - xy;
-	dtf_t nyy_xx = nyy - xx;
-	dtf_t slope = nxy_xy / nyy_xx;
-	dtf_t intercept = y - slope * x;
-	return make_pair_t(slope, intercept);
+dtf_t slope(const dtf_t &n, const T1 &x, const T2 &y) {
+	dtf_t xy = dtf_t(x * y);
+	dtf_t nxy = dtf_t(n * xy);
+	dtf_t yy = dtf_t(y * y);
+	dtf_t nyy = dtf_t(n * yy);
+	dtf_t xx = dtf_t(x * x);
+	dtf_t nxy_xy = dtf_t(nxy - xy);
+	dtf_t nyy_xx = dtf_t(nyy - xx);
+	dtf_t out = dtf_t(nxy_xy / nyy_xx);
+	return out;
+}
+
+template<typename T1, typename T2>
+dtf_t intercept(dtf_t n, T1 y, dtf_t slope, T2 x) {
+	dtf_t tmp1 = dtf_t(slope * x);
+	dtf_t tmp2 = dtf_t(y - tmp1);
+	dtf_t out = dtf_t(tmp2 / n);
+	return out;
+}
+
+template<typename T1, typename T2>
+dtf_t residual(const T1 &x, const T2 &y, const dtf_t &slope, const dtf_t &intercept) {
+	dtf_t tmp1 = dtf_t(slope * x);
+	dtf_t tmp2 = dtf_t(tmp1 + intercept);
+	dtf_t out = dtf_t(y - tmp2);
+	return out;
+}
+
+template<typename T1, typename T2, typename T3>
+uint4_t largestResid(const T1* x, const T2* y, const T3* z,
+		const uint1_t* valid, dtf_t sp, dtf_t ip, dtf_t sz,
+		dtf_t iz, int SZ, int LAYERS) {
+	uint4_t out = 0;
+	dtf_t largest = 0;
+	for(int i = 0; i < SZ; i++) {
+		if(*(valid+i)) {
+			dtf_t r_tmp = *(x+i);
+			dtf_t phi_tmp = *(y+i);
+			dtf_t z_tmp = *(z+i);
+			dtf_t phi_resid = residual(r_tmp, phi_tmp, sp, ip);
+			dtf_t z_resid = residual(r_tmp, z_tmp, sz, iz);
+			dtf_t phiz_resid = abs_t(phi_resid + z_resid);
+
+			if(phiz_resid > largest) {
+				largest = phiz_resid;
+				out = i;
+			}
+		}
+	}
+	return out;
 }
 
 template<typename T>
-struct array_t {
-    int size_;
-    T data_[12];
-    array_t() : size_(0) {}
-    void push_back(const T &value) { data_[size_++] = value; }
-    T &operator[](const int &idx) { return data_[idx]; }
-    const T &operator[](const int &idx) const { return data_[idx]; }
-    T *begin() { return &data_[0]; }
-    const T *begin() const { return &data_[0]; }
-    T *end() { return &data_[size_]; }
-    const T *end() const { return &data_[size_]; }
-    int size() const { return size_; }
-    void clear() { size_ = 0; }
-};
+uint1_t exit_t(const T* pupulation, int LAYERS) {
+	for(int i = 0; i < LAYERS; i++)
+		if(*(pupulation+i) > 1)
+			return 0;
+	return 1;
+}
 
-struct LRStub {
-    int13_t r = 0;
-    int14_t phi = 0;
-    int14_t z = 0;
-    uint3_t layerId = 0;
-    bool valid = false;
-};
+template<typename T>
+uint3_t foundLayers(const T* pupulation, int LAYERS) {
+	uint3_t out = 0;
+	for(int i = 0; i < LAYERS; i++)
+	   if(*(pupulation+i) > 0)
+		   out += 1;
+	return out;
+}
 
-struct LRTrack {
-    dtf_t qOverPt = 0;
-    dtf_t phiT = 0;
-    dtf_t cotTheta = 0;
-    dtf_t zT = 0;
-
-    LRTrack(dtf_t qOverPt = 0, dtf_t phiT = 0, dtf_t cotTheta = 0, dtf_t zT = 0)
-    	: qOverPt(qOverPt), phiT(phiT), cotTheta(cotTheta), zT(zT) {}
-};
-
-struct stubData {
-    dtf_t RPhi = 0;
-    dtf_t Phi = 0;
-    dtf_t RZ = 0;
-    dtf_t Z = 0;
-
-    explicit stubData(const dtf_t &RPhi = 0, const dtf_t &Phi = 0, const dtf_t &RZ = 0, const dtf_t &Z = 0) :
-                RPhi(RPhi), Phi(Phi), RZ(RZ), Z(Z) {}
-
-    stubData &operator<=(const stubData &a) {
-        RPhi = min_t(RPhi, a.RPhi);
-        Phi = min_t(Phi, a.Phi);
-        RZ = min_t(RZ, a.RZ);
-        Z = min_t(Z, a.Z);
-        return *this;
-    }
-
-    stubData &operator>=(const stubData &a) {
-        RPhi = max_t(RPhi, a.RPhi);
-        Phi = max_t(Phi, a.Phi);
-        RZ = max_t(RZ, a.RZ);
-        Z = max_t(Z, a.Z);
-        return *this;
-    }
-
-    stubData operator+(const stubData &a) {
-        RPhi += a.RPhi;
-        Phi += a.Phi;
-        RZ += a.RZ;
-        Z += a.Z;
-        return *this;
-    }
-
-    stubData &operator/=(const dtf_t &a) {
-        RPhi /= a;
-        Phi /= a;
-        RZ /= a;
-        Z /= a;
-        return *this;
-    }
-};
-
-struct sumData {
-    dtf_t n = 0;
-    dtf_t xy = 0;
-    dtf_t x = 0;
-    dtf_t y = 0;
-    dtf_t xx = 0;
-
-    sumData &operator+=(const sumData &stub) {
-        n++;
-        xy += stub.xy;
-        x += stub.x;
-        y += stub.y;
-        xx += stub.xx;
-        return *this;
-    }
-
-    sumData &operator+=(const pair_t<dtf_t, dtf_t> &stub) {
-        n++;
-        xy += dtf_t(stub.first * stub.second);
-        x += stub.first;
-        y += stub.second;
-        xx += dtf_t(stub.first * stub.first);
-        return *this;
-    }
-
-    pair_t<dtf_t, dtf_t> calcLinearParameter() const {
-        auto denominator = dtf_t(n * xx - x * x);
-        auto slope = dtf_t(dtf_t(n * xy - x * y) / denominator);
-        auto intercept = dtf_t(dtf_t(y * xx - x * xy) / denominator);
-        return make_pair_t(slope, intercept);
-    }
-};
-
-struct residData {
-    dtf_t phi = 0;
-    dtf_t z = 0;
-    uint3_t layerId = 0;
-    uint4_t stubId = 0;
-    bool valid = false;
-
-    residData() : phi(0), z(0), layerId(0), stubId(0), valid(false) {}
-
-    residData(dtf_t x) : phi(x), z(x), layerId(0), stubId(0), valid(false) {}
-
-    residData(const dtf_t& phi, const dtf_t& z, const uint3_t& layerId, const uint4_t& stubId, const bool& valid)
-    	: phi(phi), z(z), layerId(layerId), stubId(stubId), valid(false) {}
-
-    dtf_t combined() const {
-        return (phi + z);
-    }
-};
-
-//template <typename T>
-//T multiply_t(const T &multiplicand, const T &multiplier) {
-//
-//    dtf_t A = multiplicand;
-//    dtf_t B = multiplier;
-//
-//    ap_fixed<WB+WB,IB+IB> R = 0;
-//
-//    bool A_neg_flag = false;
-//    bool B_neg_flag = false;
-//
-//    if(A.is_neg()) {
-//        A = -A;
-//        A_neg_flag = true;
-//    }
-//
-//    if(B.is_neg()) {
-//        B = -B;
-//        B_neg_flag = true;
-//    }
-//
-//    ap_uint<WB+FB> A_sh = ap_fixed<WB+FB,IB+FB>(A) << FB;
-//    ap_uint<WB+FB> B_sh = ap_fixed<WB+FB,IB+FB>(B) << FB;
-//    ap_uint<2*(WB+FB)> pv = 0;
-//    ap_uint<2*(WB+FB)> bp = 0;
-//
-//    bp.range((WB+FB)-1, 0) = B_sh;
-//
-//    for(int i = 0; i < WB+FB; i++) {
-//        if(A_sh.bit(i) == 1) {
-//            pv = pv + bp;
-//        }
-//        bp = bp << 1;
-//    }
-//
-//    ap_uint<2*(WB+FB)> res_uint = pv;
-//    R = ap_fixed<2*(WB+FB),2*(IB+FB)>(res_uint) >> (FB+FB);
-//
-//    if(A_neg_flag) {
-//        R = -R;
-//    }
-//    if(B_neg_flag) {
-//        R = -R;
-//    }
-//    return dtf_t(R);
-//}
-
-//template <typename T>
-//T divide_t(const T &dividend, const T &divisor) {
-//
-//    dtf_t Q = 0;
-//    dtf_t R = 0;
-//    dtf_t div = dividend;
-//    dtf_t dis = divisor;
-//
-//    bool div_neg_flag = false;
-//    bool dis_neg_flag = false;
-//
-//    if(div.is_neg()) {
-//        div = -div;
-//        div_neg_flag = true;
-//    }
-//
-//    if(dis.is_neg()) {
-//        dis = -dis;
-//        dis_neg_flag = true;
-//    }
-//
-//    ap_uint<WB+FB> div_sh = ap_fixed<WB+FB,IB+FB>(div) << FB;
-//    ap_uint<WB+FB> dis_sh = ap_fixed<WB+FB,IB+FB>(dis) << FB;
-//    ap_uint<WB+FB+1> B = 0;
-//    B.range((WB+FB-1), 0) = dis_sh;
-//    ap_uint<2*(WB+FB)+1> AQ = 0;
-//    AQ.range((WB+FB-1), 0) = div_sh;
-//
-//    for(int i = 0; i < WB+FB+FB; i++) {
-//
-//        AQ = AQ << 1;
-//        AQ.range((2*(WB+FB)), (WB+FB)) = AQ.range((2*(WB+FB)), (WB+FB)) - B;
-//
-//        if(AQ.bit((2*(WB+FB))) == 1) {
-//            AQ.bit(0) = 0;
-//            AQ.range((2*(WB+FB)), (WB+FB)) = AQ.range((2*(WB+FB)), (WB+FB)) + B;
-//
-//        } else {
-//            AQ.bit(0) = 1;
-//
-//        }
-//    }
-//
-//    ap_uint<WB+FB+1> rem_uint = AQ.range((2*(WB+FB)), (WB+FB));
-//    ap_uint<WB+FB> quo_uint = AQ.range((WB+FB-1), 0);
-//
-//    R = ap_fixed<WB+WB,IB+WB>(rem_uint) >> FB;
-//    Q = ap_fixed<WB+WB,IB+WB>(quo_uint) >> FB;
-//
-//    if(div_neg_flag) {
-//        Q = -Q;
-//    }
-//
-//    if(dis_neg_flag) {
-//        Q = -Q;
-//    }
-//
-//    return dtf_t(Q);
-//}
+template<typename T1, typename T2, typename T3>
+void killLargestResid(T1* population, const T2* layerId, T3* valid, uint4_t idx) {
+    population[*(layerId+idx)] -= 1;
+    *(valid+idx) = 0;
+}
 
 #ifdef CMSSW_GIT_HASH
 }

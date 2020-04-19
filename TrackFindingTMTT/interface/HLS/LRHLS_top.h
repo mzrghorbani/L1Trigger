@@ -15,9 +15,7 @@ Created by Maziar Ghorbani - Brunel University on 12/06/19.
 #include "LRHLS_v5.h"
 #endif
 
-typedef StubHLS T;
-
-#define WIN_LEN 10
+#define WIN_LEN 12
 #define LAYERS 7
 #define LIMIT 4
 
@@ -27,7 +25,7 @@ namespace TMTT {
 namespace HLS {
 #endif
 
-void LRHLS_top(int13_t r[10], int14_t phi[10], int14_t z[10], uint3_t layerId[10], bool valid[10]);
+void LRHLS_top(const int13_t* r, const int14_t* phi, const int14_t* z, const uint3_t* layerId, uint1_t* valid);
 
 #ifdef CMSSW_GIT_HASH
 }

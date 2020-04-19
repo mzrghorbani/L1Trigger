@@ -18,6 +18,12 @@ namespace TMTT {
         int j = 0;
         int k = 0;
 
+        TMTT::HLS::int13_t r[WIN_LEN];
+        TMTT::HLS::int14_t phi[WIN_LEN];
+        TMTT:HLS::int14_t z[WIN_LEN];
+        TMTT::HLS::uint3_t layerId[WIN_LEN];
+        TMTT::HLS::uint1_t valid[WIN_LEN];
+
         for (auto trackMHT : data_->tracksMHT()) {
 
             auto *trackLR = new Track();
@@ -26,47 +32,42 @@ namespace TMTT {
             TMTT::HLS::StubHLS stubOut[WIN_LEN];
 
             for(i = 0; i < WIN_LEN; i++) {
-                stubIn[i].r_ = 0;
-                stubIn[i].phi_ = 0;
-                stubIn[i].z_ = 0;
-                stubIn[i].layerId_ = 0;
-                stubIn[i].valid_ = false;
-                stubOut[i].r_ = 0;
-                stubOut[i].phi_ = 0;
-                stubOut[i].z_ = 0;
-                stubOut[i].layerId_ = 0;
-                stubOut[i].valid_ = false;
-            }
+                r[i] = 0;
+                phi[i] = 0;
+                z[i] = 0;
+                layerId[i] = 0;
+                valid[i] = 0;
+	    }
 
             i = 0;
             for (auto stubMHT : trackMHT->stubs()) {
 
-                stubIn[i].r_ = stubMHT->r();
-                stubIn[i].phi_ = stubMHT->phi();
-                stubIn[i].z_ = stubMHT->z();
-                stubIn[i].layerId_ = stubMHT->layerId();
-                stubIn[i].valid_ = stubMHT->valid();
+                r[i] = stubMHT->r();
+                phi[i] = stubMHT->phi();
+                z[i] = stubMHT->z();
+                layerId[i] = stubMHT->layerId();
+                valid[i] = stubMHT->valid();
                 i++;
             }
 
-            TMTT::HLS::LRHLS_top(stubIn, stubOut);
+            TMTT::HLS::LRHLS_top(r, phi, z, layerId, valid);
 
             k = 0;
             for (j = 0; j < WIN_LEN; j++) {
-                if (stubOut[j].valid()) {
-                    k++;
+                if (valid[j] == 1) {
                     Stub *stubLR = new Stub();
-                    stubLR->r_ = stubOut[j].r();
-                    stubLR->phi_ = stubOut[j].phi();
-                    stubLR->z_ = stubOut[j].z();
-                    stubLR->layerId_ = stubOut[j].layerId();
-                    stubLR->valid_ = stubOut[j].valid();
+                    stubLR->r_ = r[k];
+                    stubLR->phi_ = phi[k];
+                    stubLR->z_ = z[k];
+                    stubLR->layerId_ = layerId[k];
+                    stubLR->valid_ = true;
+		    k++;
 
                     trackLR->stubs_.push_back(stubLR);
                 }
             }
 
-            if(k > 3) data_->tracksLRHLS_.push_back(trackLR);
+            data_->tracksLRHLS_.push_back(trackLR);
         }
     }
 }

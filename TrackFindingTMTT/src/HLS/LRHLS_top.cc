@@ -14,11 +14,10 @@ namespace TMTT {
 namespace HLS {
 #endif
 
-void LRHLS_top(int13_t r[10], int14_t phi[10], int14_t z[10], uint3_t layerId[10], bool valid[10]) {
+void LRHLS_top(const int13_t* r, const int14_t* phi, const int14_t* z, const uint3_t* layerId, uint1_t* valid) {
 //#pragma HLS PIPELINE II=10
 
-	LRHLS_v5<T, WIN_LEN, LAYERS, LIMIT> lrhlsV5;
-#pragma HLS ARRAY_PARTITION variable=lrhlsV5.population_ complete dim=1
+	LRHLS_v5<WIN_LEN, LAYERS, LIMIT> lrhlsV5;
 
 	lrhlsV5.produce(r, phi, z, layerId, valid);
 }
