@@ -14,12 +14,14 @@ namespace TMTT {
 namespace HLS {
 #endif
 
-void LRHLS_top(const int13_t* r, const int14_t* phi, const int14_t* z, const uint3_t* layerId, uint1_t* valid) {
-//#pragma HLS PIPELINE II=10
+void LRHLS_top(StubHLS* stubIn, StubHLS* stubOut) {
+#pragma HLS DATA_PACK variable=stubOut
+#pragma HLS DATA_PACK variable=stubIn
+//#pragma HLS PIPELINE II=1
 
 	LRHLS_v5<WIN_LEN, LAYERS, LIMIT> lrhlsV5;
 
-	lrhlsV5.produce(r, phi, z, layerId, valid);
+	lrhlsV5.produce(stubIn, stubOut);
 }
 
 #ifdef CMSSW_GIT_HASH
