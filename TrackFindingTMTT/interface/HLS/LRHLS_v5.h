@@ -17,80 +17,141 @@ namespace TMTT {
 namespace HLS {
 #endif
 
-template<int WIN_LEN, int LAYERS, int LIMIT>
+template<int I, int LAYERS, int LIMIT>
 class LRHLS_v5 {
 public:
 
-	LRHLS_v5() {}
-
+	LRHLS_v5(TrackHLS<I> *trackIn, TrackHLS<I> *trackOut);
 	~LRHLS_v5() {}
 
-	void produce(StubHLS* stubIn, StubHLS* stubOut);
+	void produce();
+	void initFit();
+	void calcHelix();
+	void calcResidual();
+	void killResidual();
+	uint1_t exit_t();
 
 public:
 
-
+	TrackHLS<I> *trackIn_;
+	TrackHLS<I> *trackOut_;
+	uint3_t population_[LAYERS];
+	dtf_t residuals_[I];
+	LRTrack parameters_;
+	uint3_t foundLayers_;
+	LRSums sums_;
 };
 
-template<int WIN_LEN, int LAYERS, int LIMIT>
-void LRHLS_v5<WIN_LEN, LAYERS, LIMIT>::produce(StubHLS* stubIn, StubHLS* stubOut) {
+template<int I, int LAYERS, int LIMIT>
+LRHLS_v5<I, LAYERS, LIMIT>::LRHLS_v5(TrackHLS<I> *trackIn, TrackHLS<I> *trackOut) : trackIn_(trackIn), trackOut_(trackOut), foundLayers_(0) {
 
-    static int13_t r[WIN_LEN];
-    static int14_t phi[WIN_LEN];
-    static int14_t z[WIN_LEN];
-    static uint3_t layerId[WIN_LEN];
-    static uint1_t valid[WIN_LEN];
+}
 
-	for(int i = WIN_LEN-1; i > 0; i--) {
-		r[i] = r[i-1];
-		phi[i] = phi[i-1];
-		z[i] = z[i-1];
-		layerId[i] = layerId[i-1];
-		valid[i] = valid[i-1];
-	}
-	r[0] = stubIn->r;
-	phi[0] = stubIn->phi;
-	z[0] = stubIn->z;
-	layerId[0] = stubIn->layerId;
-	valid[0] = stubIn->valid;
 
-	static int population_[LAYERS];
-#pragma HLS ARRAY_PARTITION variable=population_ complete dim=1
-	static int nStubs = 0;
+template<int I, int LAYERS, int LIMIT>
+void LRHLS_v5<I, LAYERS, LIMIT>::produce() {
 
-	if(valid[0]) {
-		population_[layerId[0]] += 1;
-		nStubs +=1;
+	initFit();
+	calcHelix();
+
+	for(int i = 0; i < I; i++) {
+
+		if(exit_t())
+			break;
+
+		calcResidual();
+		killResidual();
 	}
 
-	if(nStubs == WIN_LEN) {
+	for(int i = 0; i < I; i++) {
+		trackOut_->stubs[i] = trackIn_->stubs[i];
+	}
+}
 
-		while(!exit_t(population_, LAYERS)) {
+template<int I, int LAYERS, int LIMIT>
+void LRHLS_v5<I, LAYERS, LIMIT>::initFit() {
 
-			uint3_t layers = foundLayers(population_, LAYERS);
+	uint1_t foundLayers[LAYERS];
+#pragma HLS ARRAY_PARTITION variable=foundLayers complete dim=1
 
-			dtf_t rSum = sums(r, layerId, valid, WIN_LEN, LAYERS);
-			dtf_t phiSum = sums(phi, layerId, valid, WIN_LEN, LAYERS);
-			dtf_t zSum = sums(z, layerId, valid, WIN_LEN, LAYERS);
+	for(int i = 0; i < LAYERS; i++) {
+		foundLayers[i] = 0;
+		population_[i] = 0;
+	}
 
-			dtf_t sp = slope(layers, rSum, phiSum);
-			dtf_t ip = intercept(layers, rSum, phiSum, sp);
+	for(int i = 0; i < I; i++) {
+		population_[trackIn_->stubs[i].layerId] += 1;
+		foundLayers[trackIn_->stubs[i].layerId] = 1;
+	}
 
-			dtf_t sz = slope(layers, rSum, zSum);
-			dtf_t iz = intercept(layers, rSum, zSum, sz);
+	for(int i = 0; i < LAYERS; i++) {
+		foundLayers_ += 1;
+	}
+}
 
-			uint4_t idx = largestResid(r, phi, z, valid, sp, ip, sz, iz, WIN_LEN, LAYERS);
+template<int I, int LAYERS, int LIMIT>
+void LRHLS_v5<I, LAYERS, LIMIT>::calcHelix() {
 
-			killLargestResid(population_, layerId, valid, idx);
+	for(int i = 0; i < I; i++) {
+		sums_.rSum = dtf_t(sums_.rSum + (dtf_t(trackIn_->stubs[i].r) >> 3));
+		sums_.phiSum = dtf_t(sums_.phiSum + (dtf_t(trackIn_->stubs[i].phi) >> 3));
+		sums_.zSum = dtf_t(sums_.zSum + (dtf_t(trackIn_->stubs[i].z) >> 3));
+	}
+
+	parameters_.sp = slope(foundLayers_, sums_.rSum, sums_.phiSum);
+	parameters_.ip = intercept(foundLayers_, sums_.rSum, sums_.phiSum, parameters_.sp);
+
+	parameters_.sz = slope(foundLayers_, sums_.rSum, sums_.zSum);
+	parameters_.iz = intercept(foundLayers_, sums_.rSum, sums_.zSum, parameters_.sz);
+}
+
+template<int I, int LAYERS, int LIMIT>
+void LRHLS_v5<I, LAYERS, LIMIT>::calcResidual() {
+
+	dtf_t phi_resid = 0;
+	dtf_t z_resid = 0;
+
+	for(int i = 0; i < I; i++) {
+
+		phi_resid = residual(trackIn_->stubs[i].r, trackIn_->stubs[i].phi, parameters_.sp, parameters_.ip);
+		z_resid = residual(trackIn_->stubs[i].r, trackIn_->stubs[i].z, parameters_.sz, parameters_.iz);
+
+		residuals_[i] = abs_t(phi_resid + z_resid);
+	}
+}
+
+template<int I, int LAYERS, int LIMIT>
+void LRHLS_v5<I, LAYERS, LIMIT>::killResidual() {
+
+	dtf_t largest = residuals_[0];
+	uint4_t idx = 0;
+
+	for(int i = 0; i < I; i++) {
+		if(residuals_[i] > largest) {
+			largest = residuals_[i];
+			idx = i;
 		}
-		nStubs = 0;
 	}
 
-	stubOut->r = r[WIN_LEN-1];
-	stubOut->phi = phi[WIN_LEN-1];
-	stubOut->z = z[WIN_LEN-1];
-	stubOut->layerId = layerId[WIN_LEN-1];
-	stubOut->valid = valid[WIN_LEN-1];
+    population_[trackIn_->stubs[idx].layerId] -= 1;
+
+    trackIn_->stubs[idx].r = 0;
+    trackIn_->stubs[idx].phi = 0;
+    trackIn_->stubs[idx].z = 0;
+    trackIn_->stubs[idx].layerId = 0;
+    trackIn_->stubs[idx].valid = 0;
+
+}
+
+template<int I, int LAYERS, int LIMIT>
+uint1_t LRHLS_v5<I, LAYERS, LIMIT>::exit_t() {
+	for(int i = 0; i < LAYERS; i++) {
+
+		if(population_[i] > 1) {
+			return 0;
+		}
+	}
+	return 1;
 }
 
 #ifdef CMSSW_GIT_HASH

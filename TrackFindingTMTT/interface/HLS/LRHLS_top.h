@@ -13,7 +13,7 @@ Created by Maziar Ghorbani - Brunel University on 12/06/19.
 #include "LRHLS_v5.h"
 #endif
 
-#define WIN_LEN 10
+#define STUBS 10
 #define LAYERS 7
 #define LIMIT 4
 
@@ -23,7 +23,7 @@ namespace TMTT {
 namespace HLS {
 #endif
 
-void LRHLS_top(StubHLS* stubIn, StubHLS* stubOut);
+void LRHLS_top(TrackHLS<STUBS> *trackIn, TrackHLS<STUBS> *trackOut);
 
 #ifdef CMSSW_GIT_HASH
 }
