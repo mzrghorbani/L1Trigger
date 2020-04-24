@@ -2,8 +2,8 @@
 Created by Maziar Ghorbani - Brunel University on 12/06/19.
 */
 
-#ifndef __LRHLS_v5_H__
-#define __LRHLS_v5_H__
+#ifndef __LRHLS_v6_H__
+#define __LRHLS_v6_H__
 
 #ifdef CMSSW_GIT_HASH
 #include "L1Trigger/TrackFindingTMTT/interface/HLS/LRHLS_types.h"
@@ -18,11 +18,11 @@ namespace HLS {
 #endif
 
 template<int I, int LAYERS, int LIMIT>
-class LRHLS_v5 {
+class LRHLS_v6 {
 public:
 
-	LRHLS_v5(TrackHLS<I> *trackIn, TrackHLS<I> *trackOut);
-	~LRHLS_v5() {}
+	LRHLS_v6(TrackHLS<I> *trackIn, TrackHLS<I> *trackOut);
+	~LRHLS_v6() {}
 
 	void produce();
 	void initFit();
@@ -43,13 +43,13 @@ public:
 };
 
 template<int I, int LAYERS, int LIMIT>
-LRHLS_v5<I, LAYERS, LIMIT>::LRHLS_v5(TrackHLS<I> *trackIn, TrackHLS<I> *trackOut) : trackIn_(trackIn), trackOut_(trackOut), foundLayers_(0) {
+LRHLS_v6<I, LAYERS, LIMIT>::LRHLS_v6(TrackHLS<I> *trackIn, TrackHLS<I> *trackOut) : trackIn_(trackIn), trackOut_(trackOut), foundLayers_(0) {
 
 }
 
 
 template<int I, int LAYERS, int LIMIT>
-void LRHLS_v5<I, LAYERS, LIMIT>::produce() {
+void LRHLS_v6<I, LAYERS, LIMIT>::produce() {
 
 	initFit();
 	calcHelix();
@@ -69,7 +69,7 @@ void LRHLS_v5<I, LAYERS, LIMIT>::produce() {
 }
 
 template<int I, int LAYERS, int LIMIT>
-void LRHLS_v5<I, LAYERS, LIMIT>::initFit() {
+void LRHLS_v6<I, LAYERS, LIMIT>::initFit() {
 
 	uint1_t foundLayers[LAYERS];
 #pragma HLS ARRAY_PARTITION variable=foundLayers complete dim=1
@@ -90,7 +90,7 @@ void LRHLS_v5<I, LAYERS, LIMIT>::initFit() {
 }
 
 template<int I, int LAYERS, int LIMIT>
-void LRHLS_v5<I, LAYERS, LIMIT>::calcHelix() {
+void LRHLS_v6<I, LAYERS, LIMIT>::calcHelix() {
 
 	for(int i = 0; i < I; i++) {
 		sums_.rSum = dtf_t(sums_.rSum + (dtf_t(trackIn_->stubs[i].r) >> 3));
@@ -106,7 +106,7 @@ void LRHLS_v5<I, LAYERS, LIMIT>::calcHelix() {
 }
 
 template<int I, int LAYERS, int LIMIT>
-void LRHLS_v5<I, LAYERS, LIMIT>::calcResidual() {
+void LRHLS_v6<I, LAYERS, LIMIT>::calcResidual() {
 
 	dtf_t phi_resid = 0;
 	dtf_t z_resid = 0;
@@ -121,7 +121,7 @@ void LRHLS_v5<I, LAYERS, LIMIT>::calcResidual() {
 }
 
 template<int I, int LAYERS, int LIMIT>
-void LRHLS_v5<I, LAYERS, LIMIT>::killResidual() {
+void LRHLS_v6<I, LAYERS, LIMIT>::killResidual() {
 
 	dtf_t largest = residuals_[0];
 	uint4_t idx = 0;
@@ -144,7 +144,7 @@ void LRHLS_v5<I, LAYERS, LIMIT>::killResidual() {
 }
 
 template<int I, int LAYERS, int LIMIT>
-uint1_t LRHLS_v5<I, LAYERS, LIMIT>::exit_t() {
+uint1_t LRHLS_v6<I, LAYERS, LIMIT>::exit_t() {
 	for(int i = 0; i < LAYERS; i++) {
 
 		if(population_[i] > 1) {
