@@ -14,14 +14,13 @@ namespace TMTT {
 namespace HLS {
 #endif
 
-void LRHLS_top(TrackHLS<STUBS> *trackIn, TrackHLS<STUBS> *trackOut) {
-#pragma HLS PIPELINE II=1 enable_flush
+void LRHLS_top(TrackHLS<STUBS> &trackIn, TrackHLS<STUBS> &trackOut) {
 
-	LRHLS_v6<STUBS, LAYERS, LIMIT> lrhlsV5(trackIn, trackOut);
-#pragma HLS ARRAY_PARTITION variable=lrhlsV6.residuals_ complete dim=1
+	LRHLS_v6<STUBS, LAYERS, LIMIT> lrhlsV6(trackIn, trackOut);
+#pragma HLS ARRAY_PARTITION variable=lrhlsV6.stubs_ complete dim=1
 #pragma HLS ARRAY_PARTITION variable=lrhlsV6.population_ complete dim=1
 
-	lrhlsV5.produce();
+	lrhlsV6.produce();
 }
 
 #ifdef CMSSW_GIT_HASH

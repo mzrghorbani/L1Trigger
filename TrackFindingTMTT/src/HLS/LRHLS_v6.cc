@@ -14,7 +14,6 @@ namespace TMTT {
 namespace HLS {
 #endif
 
-
 #ifdef CMSSW_GIT_HASH
 }
 

@@ -27,7 +27,7 @@ enum {
     B14 = 14, B13 = 13, B4 = 4, B3 = 3, B1 = 1
 };
 enum {
-    WB = 35, IB = 28, FB = WB - IB
+    WB = 24, IB = 18, FB = WB - IB
 };
 
 // Native variables used in SW
@@ -47,23 +47,23 @@ typedef ap_int<B14> int14_t;
 typedef ap_fixed<WB,IB> dtf_t;
 
 struct StubHLS{
-    int13_t r;
-    int14_t phi;
-    int14_t z;
-    uint3_t layerId;
-    uint1_t valid;
+    int13_t r = 0;
+    int14_t phi = 0;
+    int14_t z = 0;
+    uint3_t layerId = 0;
+    uint1_t valid = 0;
 };
 
-template<int I>
+template<int STUBS>
 struct TrackHLS {
-	StubHLS stubs[I];
+	StubHLS stubs[STUBS];
 };
 
 struct LRTrack {
-	dtf_t sp;
-	dtf_t ip;
-	dtf_t sz;
-	dtf_t iz;
+	dtf_t sp = 0;
+	dtf_t ip = 0;
+	dtf_t sz = 0;
+	dtf_t iz = 0;
 };
 
 struct LRSums {
@@ -93,27 +93,20 @@ T max_t(const T &a, const T &b) {
     return b;
 }
 
-template<typename T1, typename T2>
-dtf_t slope(const dtf_t &n, const T1 &x, const T2 &y) {
-	dtf_t xy = dtf_t(x * y);
-	dtf_t nxy = dtf_t(n * xy);
-	dtf_t yy = dtf_t(y * y);
-	dtf_t nyy = dtf_t(n * yy);
-	dtf_t xx = dtf_t(x * x);
-	dtf_t nxy_xy = dtf_t(nxy - xy);
-	dtf_t nyy_xx = dtf_t(nyy - xx);
+template<typename T1, typename T2, typename T3>
+dtf_t slope(const T1 &n, const T2 &x, const T3 &y) {
+	dtf_t nxy_xy = dtf_t(dtf_t(n * dtf_t(x * y)) - dtf_t(x * y));
+	dtf_t nyy_xx = dtf_t(dtf_t(n * dtf_t(y * y)) - dtf_t(x * x));
 	return dtf_t(nxy_xy / nyy_xx);
 }
 
-template<typename T1, typename T2>
-dtf_t residual(const T1 &x, const T2 &y, const dtf_t &slope, const dtf_t &intercept) {
-	dtf_t tmp1 = dtf_t(slope * x);
-	dtf_t tmp2 = dtf_t(tmp1 + intercept);
-	return dtf_t(y - tmp2);
+template<typename T1, typename T2, typename T3>
+dtf_t residual(const T1 &x, const T2 &y, const T3 &slope, const T3 &intercept) {
+	return dtf_t(y - dtf_t(intercept + dtf_t(slope * x)));
 }
 
-template<typename T1, typename T2>
-dtf_t intercept(dtf_t n, T1 x, T2 y, dtf_t slope) {
+template<typename T1, typename T2, typename T3, typename T4>
+dtf_t intercept(const T1 &n, const T2 &x, const T3 &y, const T4 &slope) {
 	return dtf_t(dtf_t(y - dtf_t(slope * x)) / n);
 }
 
