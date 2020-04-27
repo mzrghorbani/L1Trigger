@@ -44,7 +44,8 @@ public:
 };
 
 template<int STUBS, int LAYERS, int LIMIT>
-LRHLS_v6<STUBS, LAYERS, LIMIT>::LRHLS_v6(TrackHLS<STUBS> &trackIn, TrackHLS<STUBS> &trackOut) : trackIn_(&trackIn), trackOut_(&trackOut), foundLayers_(0), nStubs_(0) {
+LRHLS_v6<STUBS, LAYERS, LIMIT>::LRHLS_v6(TrackHLS<STUBS> &trackIn, TrackHLS<STUBS> &trackOut) : trackIn_(&trackIn), trackOut_(&trackOut), foundLayers_(0), nStubs_(STUBS) {
+
 	for(int i = 0; i < STUBS; i++) {
 		stubs_[i] = trackIn_->stubs[i];
 	}
@@ -74,18 +75,18 @@ void LRHLS_v6<STUBS, LAYERS, LIMIT>::produce() {
 template<int STUBS, int LAYERS, int LIMIT>
 void LRHLS_v6<STUBS, LAYERS, LIMIT>::initFit() {
 
-	nStubs_ = uint4_t(STUBS);
-
 	uint1_t foundLayers[LAYERS];
 
 	for(int i = 0; i < LAYERS; i++) {
-		foundLayers[i] = 0;
 		population_[i] = 0;
 	}
 
 	for(int i = 0; i < STUBS; i++) {
 		population_[stubs_[i].layerId] += 1;
-		foundLayers[stubs_[i].layerId] = 1;
+	}
+
+	for(int i = 0; i < LAYERS; i++) {
+		foundLayers[i] = 0;
 	}
 
 	for(int i = 0; i < LAYERS; i++) {

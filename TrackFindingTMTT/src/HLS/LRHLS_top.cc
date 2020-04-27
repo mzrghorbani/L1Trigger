@@ -15,7 +15,6 @@ namespace HLS {
 #endif
 
 void LRHLS_top(ap_uint<STUBS*45> &dataIn, ap_uint<STUBS*45> &dataOut) {
-#pragma HLS PIPELINE II=450
 
 	TrackHLS<STUBS> trackIn;
 	TrackHLS<STUBS> trackOut;
@@ -32,9 +31,6 @@ void LRHLS_top(ap_uint<STUBS*45> &dataIn, ap_uint<STUBS*45> &dataOut) {
 	}
 
 	LRHLS_v6<STUBS, LAYERS, LIMIT> lrhlsV6(trackIn, trackOut);
-//#pragma HLS ARRAY_PARTITION variable=lrhlsV6.residuals_ complete dim=1
-//#pragma HLS ARRAY_PARTITION variable=lrhlsV6.population_ complete dim=1
-//#pragma HLS ARRAY_PARTITION variable=lrhlsV6.stubs_ complete dim=1
 
 	lrhlsV6.produce();
 
