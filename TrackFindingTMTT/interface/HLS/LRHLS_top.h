@@ -23,7 +23,7 @@ namespace TMTT {
 namespace HLS {
 #endif
 
-void LRHLS_top(TrackHLS<STUBS> &trackIn, TrackHLS<STUBS> &trackOut);
+void LRHLS_top(ap_uint<450> &dataIn, ap_uint<450> &dataOut);
 
 #ifdef CMSSW_GIT_HASH
 }

@@ -29,6 +29,7 @@ enum {
 enum {
     WB = 24, IB = 18, FB = WB - IB
 };
+// WB = 24, IB = 18
 
 // Native variables used in SW
 //typedef int int13_t;
@@ -66,12 +67,6 @@ struct LRTrack {
 	dtf_t iz = 0;
 };
 
-struct LRSums {
-	dtf_t rSum = 0;
-	dtf_t phiSum = 0;
-	dtf_t zSum = 0;
-};
-
 template<typename T>
 T abs_t(const T &a) {
     if (a < 0)
@@ -100,14 +95,14 @@ dtf_t slope(const T1 &n, const T2 &x, const T3 &y) {
 	return dtf_t(nxy_xy / nyy_xx);
 }
 
-template<typename T1, typename T2, typename T3>
-dtf_t residual(const T1 &x, const T2 &y, const T3 &slope, const T3 &intercept) {
-	return dtf_t(y - dtf_t(intercept + dtf_t(slope * x)));
-}
-
 template<typename T1, typename T2, typename T3, typename T4>
 dtf_t intercept(const T1 &n, const T2 &x, const T3 &y, const T4 &slope) {
 	return dtf_t(dtf_t(y - dtf_t(slope * x)) / n);
+}
+
+template<typename T1, typename T2, typename T3>
+dtf_t residual(const T1 &x, const T2 &y, const T3 &slope, const T3 &intercept) {
+	return dtf_t(y - dtf_t(intercept + dtf_t(slope * x)));
 }
 
 #ifdef CMSSW_GIT_HASH

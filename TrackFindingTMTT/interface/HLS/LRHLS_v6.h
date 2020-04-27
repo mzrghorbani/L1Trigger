@@ -41,7 +41,6 @@ public:
 	LRTrack parameters_;
 	uint3_t foundLayers_;
 	uint4_t nStubs_;
-	LRSums sums_;
 };
 
 template<int STUBS, int LAYERS, int LIMIT>
@@ -75,9 +74,9 @@ void LRHLS_v6<STUBS, LAYERS, LIMIT>::produce() {
 template<int STUBS, int LAYERS, int LIMIT>
 void LRHLS_v6<STUBS, LAYERS, LIMIT>::initFit() {
 
-	uint1_t foundLayers[LAYERS];
-
 	nStubs_ = uint4_t(STUBS);
+
+	uint1_t foundLayers[LAYERS];
 
 	for(int i = 0; i < LAYERS; i++) {
 		foundLayers[i] = 0;
@@ -97,17 +96,21 @@ void LRHLS_v6<STUBS, LAYERS, LIMIT>::initFit() {
 template<int STUBS, int LAYERS, int LIMIT>
 void LRHLS_v6<STUBS, LAYERS, LIMIT>::calcHelix() {
 
+	dtf_t rSum = 0;
+	dtf_t phiSum = 0;
+	dtf_t zSum = 0;
+
 	for(int i = 0; i < STUBS; i++) {
-		sums_.rSum = dtf_t(sums_.rSum + (dtf_t(stubs_[i].r) >> LAYERS));
-		sums_.phiSum = dtf_t(sums_.phiSum + (dtf_t(stubs_[i].phi) >> LAYERS));
-		sums_.zSum = dtf_t(sums_.zSum + (dtf_t(stubs_[i].z) >> LAYERS));
+		rSum = dtf_t(rSum + (dtf_t(stubs_[i].r) >> LAYERS));
+		phiSum = dtf_t(phiSum + (dtf_t(stubs_[i].phi) >> LAYERS));
+		zSum = dtf_t(zSum + (dtf_t(stubs_[i].z) >> LAYERS));
 	}
 
-	parameters_.sp = slope(foundLayers_, sums_.rSum, sums_.phiSum);
-	parameters_.ip = intercept(foundLayers_, sums_.rSum, sums_.phiSum, parameters_.sp);
+	parameters_.sp = slope(foundLayers_, rSum, phiSum);
+	parameters_.ip = intercept(foundLayers_, rSum, phiSum, parameters_.sp);
 
-	parameters_.sz = slope(foundLayers_, sums_.rSum, sums_.zSum);
-	parameters_.iz = intercept(foundLayers_, sums_.rSum, sums_.zSum, parameters_.sz);
+	parameters_.sz = slope(foundLayers_, rSum, zSum);
+	parameters_.iz = intercept(foundLayers_, rSum, zSum, parameters_.sz);
 }
 
 template<int STUBS, int LAYERS, int LIMIT>
