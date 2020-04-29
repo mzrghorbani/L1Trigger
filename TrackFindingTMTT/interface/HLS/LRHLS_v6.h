@@ -46,24 +46,25 @@ public:
 template<int STUBS, int LAYERS, int LIMIT>
 LRHLS_v6<STUBS, LAYERS, LIMIT>::LRHLS_v6(TrackHLS<STUBS> &trackIn, TrackHLS<STUBS> &trackOut) : trackIn_(&trackIn), trackOut_(&trackOut), foundLayers_(0), nStubs_(STUBS) {
 
-	for(int i = 0; i < STUBS; i++) {
-		stubs_[i] = trackIn_->stubs[i];
-	}
 }
 
 
 template<int STUBS, int LAYERS, int LIMIT>
 void LRHLS_v6<STUBS, LAYERS, LIMIT>::produce() {
 
+	for(int i = 0; i < STUBS; i++) {
+		stubs_[i] = trackIn_->stubs[i];
+	}
+
 	initFit();
 	calcHelix();
+	calcResidual();
 
 	for(int i = 0; i < STUBS; i++) {
 
 		if(exit_t() && (nStubs_ <= LIMIT))
 			break;
 
-		calcResidual();
 		killResidual();
 	}
 
@@ -79,14 +80,12 @@ void LRHLS_v6<STUBS, LAYERS, LIMIT>::initFit() {
 
 	for(int i = 0; i < LAYERS; i++) {
 		population_[i] = 0;
+		foundLayers[i] = 0;
 	}
 
 	for(int i = 0; i < STUBS; i++) {
 		population_[stubs_[i].layerId] += 1;
-	}
-
-	for(int i = 0; i < LAYERS; i++) {
-		foundLayers[i] = 0;
+		residuals_[i] = 0;
 	}
 
 	for(int i = 0; i < LAYERS; i++) {
@@ -102,9 +101,9 @@ void LRHLS_v6<STUBS, LAYERS, LIMIT>::calcHelix() {
 	dtf_t zSum = 0;
 
 	for(int i = 0; i < STUBS; i++) {
-		rSum = dtf_t(rSum + (dtf_t(stubs_[i].r) >> LAYERS));
-		phiSum = dtf_t(phiSum + (dtf_t(stubs_[i].phi) >> LAYERS));
-		zSum = dtf_t(zSum + (dtf_t(stubs_[i].z) >> LAYERS));
+		rSum = dtf_t(rSum + (dtf_t(stubs_[i].r) >> foundLayers_));
+		phiSum = dtf_t(phiSum + (dtf_t(stubs_[i].phi) >> foundLayers_));
+		zSum = dtf_t(zSum + (dtf_t(stubs_[i].z) >> foundLayers_));
 	}
 
 	parameters_.sp = slope(foundLayers_, rSum, phiSum);
@@ -117,20 +116,11 @@ void LRHLS_v6<STUBS, LAYERS, LIMIT>::calcHelix() {
 template<int STUBS, int LAYERS, int LIMIT>
 void LRHLS_v6<STUBS, LAYERS, LIMIT>::calcResidual() {
 
-	dtf_t phi_resid = 0;
-	dtf_t z_resid = 0;
-
 	for(int i = 0; i < STUBS; i++) {
-		residuals_[i] = 0;
-	}
+		dtf_t phi_resid = residual(stubs_[i].r, stubs_[i].phi, parameters_.sp, parameters_.ip);
+		dtf_t z_resid = residual(stubs_[i].r, stubs_[i].z, parameters_.sz, parameters_.iz);
 
-	for(int i = 0; i < STUBS; i++) {
-		if(stubs_[i].valid) {
-			phi_resid = residual(stubs_[i].r, stubs_[i].phi, parameters_.sp, parameters_.ip);
-			z_resid = residual(stubs_[i].r, stubs_[i].z, parameters_.sz, parameters_.iz);
-
-			residuals_[i] = abs_t(phi_resid + z_resid);
-		}
+		residuals_[i] = abs_t(phi_resid + z_resid);
 	}
 }
 
@@ -155,13 +145,14 @@ void LRHLS_v6<STUBS, LAYERS, LIMIT>::killResidual() {
     stubs_[idx].z = 0;
     stubs_[idx].layerId = 0;
     stubs_[idx].valid = 0;
+    residuals_[idx] = 0;
 
 }
 
 template<int STUBS, int LAYERS, int LIMIT>
 uint1_t LRHLS_v6<STUBS, LAYERS, LIMIT>::exit_t() {
-	for(int i = 0; i < LAYERS; i++) {
 
+	for(int i = 0; i < LAYERS; i++) {
 		if(population_[i] > 1) {
 			return 0;
 		}

@@ -13,7 +13,7 @@ Created by Maziar Ghorbani - Brunel University on 12/06/19.
 #include "LRHLS_v6.h"
 #endif
 
-#define STUBS 12
+#define STUBS 10
 #define LAYERS 7
 #define LIMIT 4
 
