@@ -8,66 +8,59 @@ Created by Maziar Ghorbani - Brunel University on 12/06/19.
 #include "LRHLS.h"
 #endif
 
+#define d2f(x) ((double)(x) * (double)(1 << 6))
+#define f2d(x) ((double)(x) / (double)(1 << 6))
+
 namespace TMTT {
 
     LRHLS::LRHLS(Settings *settings, Data *data) : settings_(settings), data_(data) {}
 
     void LRHLS::produce() {
 
-        int i = 0;
-        int j = 0;
-        int k = 0;
-
-        TMTT::HLS::int13_t r[WIN_LEN];
-        TMTT::HLS::int14_t phi[WIN_LEN];
-        TMTT:HLS::int14_t z[WIN_LEN];
-        TMTT::HLS::uint3_t layerId[WIN_LEN];
-        TMTT::HLS::uint1_t valid[WIN_LEN];
+        int i, j, k;
 
         for (auto trackMHT : data_->tracksMHT()) {
 
-            auto *trackLR = new Track();
-
-            TMTT::HLS::StubHLS stubIn[WIN_LEN];
-            TMTT::HLS::StubHLS stubOut[WIN_LEN];
-
-            for(i = 0; i < WIN_LEN; i++) {
-                r[i] = 0;
-                phi[i] = 0;
-                z[i] = 0;
-                layerId[i] = 0;
-                valid[i] = 0;
-	    }
+            ap_uint<STUBS*45> dataIn = 0;
+            ap_uint<STUBS*45> dataOut = 0;
 
             i = 0;
             for (auto stubMHT : trackMHT->stubs()) {
 
-                r[i] = stubMHT->r();
-                phi[i] = stubMHT->phi();
-                z[i] = stubMHT->z();
-                layerId[i] = stubMHT->layerId();
-                valid[i] = stubMHT->valid();
-                i++;
+                dataIn.range(12+i,0+i) = ap_fixed<32,13>(stubMHT->r()) << 5;
+                dataIn.range(26+i,13+i) = ap_fixed<32,14>(stubMHT->phi()) << 9;
+                dataIn.range(40+i,27+i) = ap_fixed<32,14>(stubMHT->z()) << 4;
+                dataIn.range(43+i,41+i) = ap_uint<3>(stubMHT->layerId());
+                dataIn.range(44+i,44+i) = ap_uint<1>(stubMHT->valid());
+                i+=45;
             }
 
-            TMTT::HLS::LRHLS_top(r, phi, z, layerId, valid);
+            TMTT::HLS::LRHLS_top(dataIn, dataOut);
+            
+            auto *trackLR = new Track();
 
             k = 0;
-            for (j = 0; j < WIN_LEN; j++) {
-                if (valid[j] == 1) {
+            for (i = 0; i < STUBS*45; i=i+45) {
+                if(ap_uint<1>(dataOut.range(44+i,44+i)) == 1) {
+
+                    k+=1;
                     Stub *stubLR = new Stub();
-                    stubLR->r_ = r[k];
-                    stubLR->phi_ = phi[k];
-                    stubLR->z_ = z[k];
-                    stubLR->layerId_ = layerId[k];
-                    stubLR->valid_ = true;
-		    k++;
+
+                    stubLR->r_ = ap_fixed<32,13>(dataOut.range(12+i,0+i)) >> 5; 
+                    stubLR->phi_ = ap_fixed<32,14>(dataOut.range(26+i,13+i)) >> 9;
+                    stubLR->z_ = ap_fixed<32,14>(dataOut.range(40+i,27+i)) >> 4;
+                    stubLR->layerId_ = ap_uint<3>(dataOut.range(43+i,41+i));
+                    stubLR->valid_ = ap_uint<1>(dataOut.range(44+i,44+i));
 
                     trackLR->stubs_.push_back(stubLR);
                 }
             }
 
-            data_->tracksLRHLS_.push_back(trackLR);
+            if(k > 2)
+                data_->tracksLRHLS_.push_back(trackLR);
+
         }
+
     }
+
 }

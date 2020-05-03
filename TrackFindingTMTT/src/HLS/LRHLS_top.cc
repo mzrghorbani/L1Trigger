@@ -16,17 +16,19 @@ namespace HLS {
 
 void LRHLS_top(ap_uint<STUBS*45> &dataIn, ap_uint<STUBS*45> &dataOut) {
 
+	int i, j;
+
 	TrackHLS<STUBS> trackIn;
 	TrackHLS<STUBS> trackOut;
 
-	int j = 0;
-	for(int i = 0; i < STUBS*45; i=i+45) {
+	j = 0;
+	for(i = 0; i < STUBS*45; i=i+45) {
 
-		trackIn.stubs[j].r = dataIn.range(0+i, 12+i);
-		trackIn.stubs[j].phi = dataIn.range(13+i, 26+i);
-		trackIn.stubs[j].z = dataIn.range(27+i, 40+i);
-		trackIn.stubs[j].layerId = dataIn.range(41+i, 43+i);
-		trackIn.stubs[j].valid = dataIn.range(44+i, 44+i);
+		trackIn.stubs[j].r = dataIn.range(12+i,0+i);
+		trackIn.stubs[j].phi = dataIn.range(26+i,13+i);
+		trackIn.stubs[j].z = dataIn.range(40+i,27+i);
+		trackIn.stubs[j].layerId = dataIn.range(43+i,41+i);
+		trackIn.stubs[j].valid = dataIn.range(44+i,44+i);
 		j++;
 	}
 
@@ -35,13 +37,13 @@ void LRHLS_top(ap_uint<STUBS*45> &dataIn, ap_uint<STUBS*45> &dataOut) {
 	lrhlsV6.produce();
 
 	j = 0;
-	for(int i = 0; i < STUBS*45; i=i+45) {
+	for(i = 0; i < STUBS*45; i=i+45) {
 
-		dataOut.range(0+i, 12+i) = trackOut.stubs[j].r;
-		dataOut.range(13+i, 26+i) = trackOut.stubs[j].phi;
-		dataOut.range(27+i, 40+i) = trackOut.stubs[j].z;
-		dataOut.range(41+i, 43+i) = trackOut.stubs[j].layerId;
-		dataOut.range(44+i, 44+i) = trackOut.stubs[j].valid;
+		dataOut.range(12+i,0+i) = trackOut.stubs[j].r;
+		dataOut.range(26+i,13+i) = trackOut.stubs[j].phi;
+		dataOut.range(40+i,27+i) = trackOut.stubs[j].z;
+		dataOut.range(43+i,41+i) = trackOut.stubs[j].layerId;
+		dataOut.range(44+i,44+i) = trackOut.stubs[j].valid;
 		j++;
 	}
 }

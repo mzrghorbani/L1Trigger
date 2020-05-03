@@ -4,12 +4,16 @@ To checkout and run, or if your modifications won't need to be put into the cent
 
 ```
 cmsrel CMSSW_10_4_0
+
 cd CMSSW_10_4_0/src
+
 cmsenv
 
-git init
-git remote add origin https://gitlab.cern.ch/cms-uk-tracktrigger/software/tmtt.git
-git pull origin master
+git clone https://gitlab.cern.ch/mghorban1/L1Trigger.git
+
+git checkout <version>
+
+scram setup L1Trigger/TrackFindingTMTT/hls.xml 
 
 scram b -j 8
 

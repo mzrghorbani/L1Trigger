@@ -29,15 +29,14 @@ enum {
 enum {
     WB = 24, IB = 18, FB = WB - IB
 };
-// WB = 24, IB = 18
 
 // Native variables used in SW
-//typedef int int13_t;
-//typedef int int14_t;
-//typedef int uint4_t;
-//typedef int uint3_t;
-//typedef bool uint1_t;
-//typedef float dtf_t;
+// typedef int int13_t;
+// typedef int int14_t;
+// typedef int uint4_t;
+// typedef int uint3_t;
+// typedef bool uint1_t;
+// typedef double dtf_t;
 
 // Fixed-point variables used in HW
 typedef ap_uint<B1> uint1_t;
@@ -47,7 +46,7 @@ typedef ap_int<B13> int13_t;
 typedef ap_int<B14> int14_t;
 typedef ap_fixed<WB,IB> dtf_t;
 
-struct StubHLS{
+struct StubHLS {
     int13_t r = 0;
     int14_t phi = 0;
     int14_t z = 0;
