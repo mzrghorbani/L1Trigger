@@ -4,6 +4,7 @@
 #include "L1Trigger/TrackFindingTMTT/interface/TP.h"
 
 #include <algorithm>
+#include <utility>
 
 
 using namespace std;
@@ -12,8 +13,8 @@ namespace TMTT {
 
 Track::Track() {}
 
-Track::Track(const Settings *settings, const int &htCell, const Stubs &stubs, const int &pos) :
-        settings_(settings), parent_(nullptr), stubs_(stubs) {
+Track::Track(const Settings *settings, const int &htCell, Stubs stubs, const int &pos) :
+        settings_(settings), parent_(nullptr), stubs_(std::move(stubs)) {
 
     const int &numBinsPhi = settings->htNumBinsPhi();
     const int &numBinsPt = settings->htNumBinsPt();
@@ -61,8 +62,8 @@ Track::Track(const Settings *settings, const int &htCell, const Stubs &stubs, co
 }
 
 
-Track::Track(const int &mhtCell, const Track *htTrack, const Stubs &stubs, const int &pos) : settings_(
-        htTrack->settings_), parent_(htTrack), stubs_(stubs) {
+Track::Track(const int &mhtCell, const Track *htTrack, Stubs stubs, const int &pos) : settings_(
+        htTrack->settings_), parent_(htTrack), stubs_(std::move(stubs)) {
 
     const double &invPtToDphi = settings_->invPtToDphi();
     const int &numBinsPhi = settings_->mhtNumBinsPhi();
@@ -103,9 +104,9 @@ Track::Track(const int &mhtCell, const Track *htTrack, const Stubs &stubs, const
 }
 
 
-Track::Track(const Track *mhtTrack, const Stubs &stubs, const double &qOverPt, const double &phi, const double &cot,
+Track::Track(const Track *mhtTrack, Stubs stubs, const double &qOverPt, const double &phi, const double &cot,
              const double &z) :
-        settings_(mhtTrack->settings_), parent_(mhtTrack), stubs_(stubs) {
+        settings_(mhtTrack->settings_), parent_(mhtTrack), stubs_(std::move(stubs)) {
 
     const double &invPtToDphi = settings_->invPtToDphi();
     const double &chosenRofPhi = settings_->chosenRofPhi();

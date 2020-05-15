@@ -30,6 +30,9 @@ enum {
     WB = 24, IB = 18, FB = WB - IB
 };
 
+#define STUBWORD (B13+B14+B14+B3+B1)
+#define TRACKWORD (STUBS*STUBWORD+B1)
+
 // Native variables used in SW
 // typedef int int13_t;
 // typedef int int14_t;
@@ -54,9 +57,17 @@ struct StubHLS {
     uint1_t valid = 0;
 };
 
-template<int STUBS>
+template<int I>
 struct TrackHLS {
-	StubHLS stubs[STUBS];
+    //ap_uint<24> Imap = 0;
+    //ap_uint<14> tanL = 0;
+    //ap_uint<10> z0 = 0;
+    //ap_uint<16> phi0 = 0;
+    //ap_uint<14> overR = 0;
+    //ap_uint<3> *seed;
+    //const StubHLS *stubs;
+    StubHLS stubs[I];
+    ap_uint<1> valid = 0;
 };
 
 struct LRTrack {

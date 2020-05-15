@@ -8,9 +8,6 @@ Created by Maziar Ghorbani - Brunel University on 12/06/19.
 #include "LRHLS.h"
 #endif
 
-#define d2f(x) ((double)(x) * (double)(1 << 6))
-#define f2d(x) ((double)(x) / (double)(1 << 6))
-
 namespace TMTT {
 
     LRHLS::LRHLS(Settings *settings, Data *data) : settings_(settings), data_(data) {}
@@ -55,10 +52,27 @@ namespace TMTT {
                     trackLR->stubs_.push_back(stubLR);
                 }
             }
+            if(k > 1) {
+                trackLR->valid_ = true;
+                trackLR->settings_ = trackMHT->settings_;
+                trackLR->tps_ = trackMHT->tps();
+                trackLR->region_ = trackMHT->region();
+                trackLR->parent_ = trackMHT->parent();
+                trackLR->streamId_ = trackMHT->streamId();
+                trackLR->streamPos_ = trackMHT->streamPos();
+                trackLR->cellId_ = trackMHT->cellId();
+                trackLR->secEta_ = trackMHT->secEta();
+                trackLR->secPhi_ = trackMHT->secPhi();
+                trackLR->qOverPt_ = trackMHT->qOverPt();
+                trackLR->phi_ = trackMHT->phi();
+                trackLR->cot_ = trackMHT->cot();
+                trackLR->z_ = trackMHT->z();
+                trackLR->chi2_ = trackMHT->chi2();
+                trackLR->binPhi_ = trackMHT->binPhi();
+                trackLR->binPt_ = trackMHT->binPt();
 
-            if(k > 2)
                 data_->tracksLRHLS_.push_back(trackLR);
-
+            }
         }
 
     }

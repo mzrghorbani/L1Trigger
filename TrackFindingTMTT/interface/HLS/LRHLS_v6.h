@@ -72,6 +72,7 @@ void LRHLS_v6<STUBS, LAYERS, LIMIT>::produce() {
 		trackOut_->stubs[i] = stubs_[i];
 	}
 
+	trackOut_->valid = trackIn_->valid;
 }
 
 template<int STUBS, int LAYERS, int LIMIT>

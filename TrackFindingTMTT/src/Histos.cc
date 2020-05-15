@@ -4,7 +4,6 @@
 #include "L1Trigger/TrackFindingTMTT/interface/TP.h"
 #include "L1Trigger/TrackFindingTMTT/interface/Track.h"
 
-
 #include <string>
 #include <sstream>
 #include <iostream>
@@ -161,7 +160,7 @@ void Histos::bookGP() {
 void Histos::fillGP() {
 
     const TPs &tps = data_->tps();
-    const Stubs &stubs = data_->stubs();
+    const Stubs &stubs_ = data_->stubs();
 
     int nStubs(0);
     int nLostStubs(0);
@@ -169,7 +168,7 @@ void Histos::fillGP() {
     int nTPs(0);
 
     Stubss stubss(numRegions_ * numSectors_);
-    for (Stub *stub : stubs)
+    for (Stub *stub : stubs_)
         for (const int &id : stub->gpStreamIds())
             stubss[id].push_back(stub);
 
@@ -266,16 +265,16 @@ void Histos::bookMHT() {
 
 void Histos::fillMHT() {
 
-    const Tracks &tracks = data_->tracksMHT();
+    const Tracks &tracks_ = data_->tracksMHT();
 
     int nStubs(0);
     int nGaps(0);
     int nTracks(0);
     int nTPs(0);
 
-    nTracks = tracks.size();
+    nTracks = tracks_.size();
     TPs tps;
-    for (const Track *track : tracks) {
+    for (const Track *track : tracks_) {
         nStubs += track->size();
         for (TP *tp : track->tps())
             if (tp->useForAlgEff()) {
@@ -289,7 +288,7 @@ void Histos::fillMHT() {
     nTPs = tps.size();
 
     Trackss trackss(numRegions_ * numBinsPt_);
-    for (Track *track : tracks) {
+    for (Track *track : tracks_) {
         const int &id = track->streamId();
         trackss[id].push_back(track);
     }
@@ -421,7 +420,7 @@ void Histos::fillLRHLS() {
         LRHLSphi_->Fill(track->phi());
         LRHLSz_->Fill(track->z());
         LRHLScot_->Fill(track->cot());
-//        LRHLSchi2_->Fill(track->chi2());
+        LRHLSchi2_->Fill(track->chi2());
         LRHLSchi2_->Fill(track->cot());
     }
 
@@ -460,35 +459,65 @@ void Histos::bookDR() {
 
 }
 
-void Histos::fillDR() {
+    void Histos::fillDR() {
 
-    const Tracks &tracks = data_->tracksLR();
+        const Tracks &tracks = data_->tracksLRHLS();
 
-    int nStubs(0);
-    int nGaps(0);
-    int nTracks(0);
-    int nTPs(0);
+        int nStubs(0);
+        int nGaps(0);
+        int nTracks(0);
+        int nTPs(0);
 
-    TPs tps;
-    for (const Track *track : tracks)
-        if (track->valid()) {
-            nTracks++;
-            nStubs += track->size();
-            for (TP *tp : track->tps())
-                if (tp->useForAlgEff())
-                    tps.push_back(tp);
-        }
-    sort(tps.begin(), tps.end());
-    tps.erase(unique(tps.begin(), tps.end()), tps.end());
-    nTPs = tps.size();
+        TPs tps;
+        for (const Track *track : tracks)
+            if (track->valid()) {
+                nTracks++;
+                nStubs += track->size();
+                for (TP *tp : track->tps())
+                    if (tp->useForAlgEff())
+                        tps.push_back(tp);
+            }
+        sort(tps.begin(), tps.end());
+        tps.erase(unique(tps.begin(), tps.end()), tps.end());
+        nTPs = tps.size();
 
-    profDR_->Fill(1, nStubs);
-    profDR_->Fill(2, nGaps);
-    profDR_->Fill(3, nTracks);
-    profDR_->Fill(4, nTPs);
-    numTPs_["DR"] += nTPs;
+        profDR_->Fill(1, nStubs);
+        profDR_->Fill(2, nGaps);
+        profDR_->Fill(3, nTracks);
+        profDR_->Fill(4, nTPs);
+        numTPs_["DR"] += nTPs;
 
-}
+    }
+
+//void Histos::fillDR() {
+//
+//    const Tracks &tracks = data_->tracksLR();
+//
+//    int nStubs(0);
+//    int nGaps(0);
+//    int nTracks(0);
+//    int nTPs(0);
+//
+//    TPs tps;
+//    for (const Track *track : tracks)
+//        if (track->valid()) {
+//            nTracks++;
+//            nStubs += track->size();
+//            for (TP *tp : track->tps())
+//                if (tp->useForAlgEff())
+//                    tps.push_back(tp);
+//        }
+//    sort(tps.begin(), tps.end());
+//    tps.erase(unique(tps.begin(), tps.end()), tps.end());
+//    nTPs = tps.size();
+//
+//    profDR_->Fill(1, nStubs);
+//    profDR_->Fill(2, nGaps);
+//    profDR_->Fill(3, nTracks);
+//    profDR_->Fill(4, nTPs);
+//    numTPs_["DR"] += nTPs;
+//
+//}
 
 void Histos::printPerformanceTracker() {
 

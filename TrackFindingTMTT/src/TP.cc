@@ -8,7 +8,7 @@ using namespace std;
 
 namespace TMTT {
 
-TP::TP( const Settings* settings, const TrackingParticlePtr& tpPtr, const bool& tight, vector< const reco::GenJet* > jets ) :
+TP::TP( const Settings* settings, const TrackingParticlePtr& tpPtr, const bool& tight, const vector< const reco::GenJet* >& jets ) :
   settings_ ( settings              ),
   edmPtr_   ( tpPtr                 ),
   eta_      ( tpPtr->eta()          ),

@@ -17,13 +17,15 @@ Created by Maziar Ghorbani - Brunel University on 12/06/19.
 #define LAYERS 7
 #define LIMIT 4
 
+typedef ap_uint<TRACKWORD> data_t;
+
 #ifdef CMSSW_GIT_HASH
 namespace TMTT {
 
 namespace HLS {
 #endif
 
-void LRHLS_top(ap_uint<STUBS*45> &dataIn, ap_uint<STUBS*45> &dataOut);
+void LRHLS_top(data_t &dataIn, data_t &dataOut);
 
 #ifdef CMSSW_GIT_HASH
 }

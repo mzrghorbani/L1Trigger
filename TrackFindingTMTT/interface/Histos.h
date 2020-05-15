@@ -22,11 +22,8 @@ using namespace std;
 namespace TMTT {
 
 class Settings;
-
 class Track;
-
 class Stub;
-
 class TP;
 
 class Histos {
@@ -44,58 +41,35 @@ public:
 private:
 
     void bookTracker();
-
     void bookDTC();
-
     void bookGP();
-
     void bookHT();
-
     void bookMHT();
-
     void bookLR();
-
     void bookLRHLS();
-
     void bookDR();
 
     void fillTracker();
-
     void fillDTC();
-
     void fillGP();
-
     void fillHT();
-
     void fillMHT();
-
     void fillLR();
-
     void fillLRHLS();
-
     void fillDR();
 
     void printPerformanceTracker();
-
     void printPerformanceDTC();
-
     void printPerformanceGP();
-
     void printPerformanceHT();
-
     void printPerformanceMHT();
-
     void printPerformanceLR();
-
     void printPerformanceLRHLS();
-
     void printPerformanceDR();
 
     // Configuration parameters.
-
     const Settings *settings_;
     Data *data_;
-
     const double maxQoverPt_;
     const int numRegions_;
     const int numDTCsPerTFP_;

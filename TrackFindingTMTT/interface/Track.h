@@ -30,7 +30,7 @@ public:
   @param[in] stubs Stubs forming this track
   @param[in] pos stream position of this track
   */
-  Track( const Settings* settings, const int& htCell, const Stubs& stubs, const int& pos );
+  Track( const Settings* settings, const int& htCell, Stubs  stubs, const int& pos );
 
   /*!
    Constructor used in MHT.
@@ -39,7 +39,7 @@ public:
   @param[in] stubs Stubs forming this track
   @param[in] pos stream position of this track
   */
-  Track( const int& mhtCell, const Track* htTrack, const Stubs& stubs, const int& pos );
+  Track( const int& mhtCell, const Track* htTrack, Stubs  stubs, const int& pos );
 
   /*!
    Constructor used in LR.
@@ -50,7 +50,7 @@ public:
   @param[in] cot fitted cot( Theta )
   @param[in] z fitted z at radius chosenRofZ
   */
-  Track( const Track* mhtTrack, const Stubs& stubs, const double& qOverPt, const double& phi, const double& cot, const double& z );
+  Track( const Track* mhtTrack, Stubs  stubs, const double& qOverPt, const double& phi, const double& cot, const double& z );
 
   ~Track(){}
 
@@ -88,7 +88,7 @@ public:
   Stubs     stubs_;
 
   int binPhi_;
-  int binPt_; 
+  int binPt_;
   int secEta_;
   int secPhi_;
   int region_;

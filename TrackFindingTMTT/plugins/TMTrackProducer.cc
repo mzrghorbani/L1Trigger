@@ -62,7 +62,6 @@ TMTrackProducer::TMTrackProducer( const edm::ParameterSet& iConfig ) {
 
 }
 
-
 TMTrackProducer::~TMTrackProducer(){
 
 //  delete settings_;
