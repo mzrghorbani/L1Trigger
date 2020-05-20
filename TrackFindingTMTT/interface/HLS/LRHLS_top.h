@@ -7,17 +7,11 @@ Created by Maziar Ghorbani - Brunel University on 12/06/19.
 
 #ifdef CMSSW_GIT_HASH
 #include "L1Trigger/TrackFindingTMTT/interface/HLS/LRHLS_types.h"
-#include "L1Trigger/TrackFindingTMTT/interface/HLS/LRHLS_v6.h"
+#include "L1Trigger/TrackFindingTMTT/interface/HLS/LRHLS_v7.h"
 #else
 #include "LRHLS_types.h"
-#include "LRHLS_v6.h"
+#include "LRHLS_v7.h"
 #endif
-
-#define STUBS 12
-#define LAYERS 7
-#define LIMIT 4
-
-typedef ap_uint<TRACKWORD> data_t;
 
 #ifdef CMSSW_GIT_HASH
 namespace TMTT {
@@ -25,7 +19,7 @@ namespace TMTT {
 namespace HLS {
 #endif
 
-void LRHLS_top(data_t &dataIn, data_t &dataOut);
+void LRHLS_top(StubHLS &dataIn, StubHLS &dataOut);
 
 #ifdef CMSSW_GIT_HASH
 }

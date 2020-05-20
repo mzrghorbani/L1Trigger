@@ -17,6 +17,11 @@
 #include <cmath>
 #endif
 
+#define STUBS 8
+#define LAYERS 7
+#define LIMIT 4
+#define STUBWORD 45
+
 #ifdef CMSSW_GIT_HASH
 namespace TMTT {
 
@@ -30,8 +35,7 @@ enum {
     WB = 24, IB = 18, FB = WB - IB
 };
 
-#define STUBWORD (B13+B14+B14+B3+B1)
-#define TRACKWORD (STUBS*STUBWORD+B1)
+typedef ap_uint<STUBWORD> data_t;
 
 // Native variables used in SW
 // typedef int int13_t;
@@ -55,19 +59,6 @@ struct StubHLS {
     int14_t z = 0;
     uint3_t layerId = 0;
     uint1_t valid = 0;
-};
-
-template<int I>
-struct TrackHLS {
-    //ap_uint<24> Imap = 0;
-    //ap_uint<14> tanL = 0;
-    //ap_uint<10> z0 = 0;
-    //ap_uint<16> phi0 = 0;
-    //ap_uint<14> overR = 0;
-    //ap_uint<3> *seed;
-    //const StubHLS *stubs;
-    StubHLS stubs[I];
-    ap_uint<1> valid = 0;
 };
 
 struct LRTrack {

@@ -3,9 +3,9 @@ Created by Maziar Ghorbani - Brunel University on 12/06/19.
 */
 
 #ifdef CMSSW_GIT_HASH
-#include "L1Trigger/TrackFindingTMTT/interface/HLS/LRHLS_v6.h"
+#include "L1Trigger/TrackFindingTMTT/interface/HLS/LRHLS_v7.h"
 #else
-#include "LRHLS_v6.h"
+#include "LRHLS_v7.h"
 #endif
 
 #ifdef CMSSW_GIT_HASH

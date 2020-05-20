@@ -14,43 +14,41 @@ namespace TMTT {
 namespace HLS {
 #endif
 
-void LRHLS_top(data_t &dataIn, data_t &dataOut) {
+void LRHLS_top(StubHLS &dataIn, StubHLS &dataOut) {
+#pragma HLS PIPELINE II=1
 
-	int i, j;
+	static StubHLS stubs[STUBS];
 
-	if(dataIn.range(TRACKWORD-1,TRACKWORD-1) == 1) {
+	static uint4_t nStubs = 0;
 
-		TrackHLS<STUBS> trackIn;
-		TrackHLS<STUBS> trackOut;
-
-		j = 0;
-		for(i = 0; i < (STUBS*STUBWORD); i=i+STUBWORD) {
-
-			trackIn.stubs[j].r = dataIn.range(12+i,0+i);
-			trackIn.stubs[j].phi = dataIn.range(26+i,13+i);
-			trackIn.stubs[j].z = dataIn.range(40+i,27+i);
-			trackIn.stubs[j].layerId = dataIn.range(43+i,41+i);
-			trackIn.stubs[j].valid = dataIn.range(44+i,44+i);
-			j++;
-		}
-		trackIn.valid = dataIn.range(TRACKWORD-1,TRACKWORD-1);
-
-		LRHLS_v6<STUBS, LAYERS, LIMIT> lrhlsV6(trackIn, trackOut);
-
-		lrhlsV6.produce();
-
-		j = 0;
-		for(i = 0; i < (STUBS*STUBWORD); i=i+STUBWORD) {
-
-			dataOut.range(12+i,0+i) = trackOut.stubs[j].r;
-			dataOut.range(26+i,13+i) = trackOut.stubs[j].phi;
-			dataOut.range(40+i,27+i) = trackOut.stubs[j].z;
-			dataOut.range(43+i,41+i) = trackOut.stubs[j].layerId;
-			dataOut.range(44+i,44+i) = trackOut.stubs[j].valid;
-			j++;
-		}
-		dataOut.range(TRACKWORD-1,TRACKWORD-1) = trackOut.valid;
+	for(int i=STUBS-1; i>0; i--) {
+		stubs[i] = stubs[i-1];
 	}
+	stubs[0] = dataIn;
+
+	StubHLS stubsIn[STUBS];
+
+	StubHLS stubsOut[STUBS];
+
+	if(dataIn.valid) {
+		nStubs++;
+
+		if(nStubs == STUBS) {
+			for(int i=STUBS-1; i>=0; i--) {
+				stubsIn[i] = stubs[i];
+			}
+
+			LRHLS_v7<STUBS, LAYERS, LIMIT> lrhlsV7(stubsIn, stubsOut);
+			lrhlsV7.produce();
+
+			for(int i=STUBS-1; i>=0; i--) {
+				stubs[i] = stubsOut[i];
+			}
+			nStubs = 0;
+		}
+	}
+
+	dataOut = stubs[STUBS-1];
 }
 
 #ifdef CMSSW_GIT_HASH
