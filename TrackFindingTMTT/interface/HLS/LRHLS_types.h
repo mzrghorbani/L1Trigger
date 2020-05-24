@@ -10,14 +10,16 @@
 
 #ifdef CMSSW_GIT_HASH
 #include <iostream>
+#include "ap_shift_reg.h"
 #include <ap_fixed.h>
 #include <cmath>
 #else
+#include "ap_shift_reg.h"
 #include <ap_fixed.h>
 #include <cmath>
 #endif
 
-#define STUBS 8
+#define STUBS 12
 #define LAYERS 7
 #define LIMIT 4
 #define STUBWORD 45
@@ -34,8 +36,6 @@ enum {
 enum {
     WB = 24, IB = 18, FB = WB - IB
 };
-
-typedef ap_uint<STUBWORD> data_t;
 
 // Native variables used in SW
 // typedef int int13_t;
@@ -61,11 +61,13 @@ struct StubHLS {
     uint1_t valid = 0;
 };
 
+typedef StubHLS data_t;
+
 struct LRTrack {
-	dtf_t sp = 0;
-	dtf_t ip = 0;
-	dtf_t sz = 0;
-	dtf_t iz = 0;
+	dtf_t sp;
+	dtf_t ip;
+	dtf_t sz;
+	dtf_t iz;
 };
 
 template<typename T>

@@ -19,7 +19,7 @@ namespace TMTT {
 namespace HLS {
 #endif
 
-void LRHLS_top(StubHLS &dataIn, StubHLS &dataOut);
+data_t LRHLS_top(data_t data);
 
 #ifdef CMSSW_GIT_HASH
 }

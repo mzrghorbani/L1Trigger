@@ -14,41 +14,15 @@ namespace TMTT {
 namespace HLS {
 #endif
 
-void LRHLS_top(StubHLS &dataIn, StubHLS &dataOut) {
+data_t LRHLS_top(data_t data) {
 #pragma HLS PIPELINE II=1
 
-	static StubHLS stubs[STUBS];
+	static LRHLS_v7<STUBS, LAYERS, LIMIT> lrhlsV7;
+#pragma HLS ARRAY_PARTITION variable=lrhlsV7.residuals_ complete dim=1
+#pragma HLS ARRAY_PARTITION variable=lrhlsV7.population_ complete dim=1
+#pragma HLS ARRAY_PARTITION variable=lrhlsV7.stubs_ complete dim=1
 
-	static uint4_t nStubs = 0;
-
-	for(int i=STUBS-1; i>0; i--) {
-		stubs[i] = stubs[i-1];
-	}
-	stubs[0] = dataIn;
-
-	StubHLS stubsIn[STUBS];
-
-	StubHLS stubsOut[STUBS];
-
-	if(dataIn.valid) {
-		nStubs++;
-
-		if(nStubs == STUBS) {
-			for(int i=STUBS-1; i>=0; i--) {
-				stubsIn[i] = stubs[i];
-			}
-
-			LRHLS_v7<STUBS, LAYERS, LIMIT> lrhlsV7(stubsIn, stubsOut);
-			lrhlsV7.produce();
-
-			for(int i=STUBS-1; i>=0; i--) {
-				stubs[i] = stubsOut[i];
-			}
-			nStubs = 0;
-		}
-	}
-
-	dataOut = stubs[STUBS-1];
+	return lrhlsV7(data);
 }
 
 #ifdef CMSSW_GIT_HASH

@@ -19,75 +19,88 @@ namespace HLS {
 
 template<int nSTUBS, int nLAYERS, int nLIMIT>
 class LRHLS_v7 {
+private:
 public:
 
-	LRHLS_v7(StubHLS stubsIn[nSTUBS], StubHLS stubsOut[nSTUBS]);
-	~LRHLS_v7() {}
-
-	void produce();
+	data_t operator()(data_t data);
 	void initFit();
 	void calcHelix();
 	void calcResidual();
+	void findLargestResidual();
 	void killResidual();
 	uint1_t exit_t();
 
 public:
-	StubHLS *stubsIn_;
-	StubHLS *stubsOut_;
-	StubHLS stubs_[nSTUBS];
+
+	data_t data_[nSTUBS];
+	data_t stubs_[nSTUBS];
 	uint3_t population_[nLAYERS];
 	dtf_t residuals_[nSTUBS];
 	LRTrack parameters_;
 	uint3_t foundLayers_;
 	uint4_t nStubs_;
+	uint4_t idx_;
 };
 
 template<int nSTUBS, int nLAYERS, int nLIMIT>
-LRHLS_v7<nSTUBS, nLAYERS, nLIMIT>::LRHLS_v7(StubHLS stubsIn[nSTUBS], StubHLS stubsOut[nSTUBS])
-	: stubsIn_(stubsIn), stubsOut_(stubsOut), foundLayers_(0), nStubs_(nSTUBS) {
+data_t LRHLS_v7<nSTUBS, nLAYERS, nLIMIT>::operator()(data_t data) {
 
-}
+    for (int i=nSTUBS-1; i>0; i--) {
+    	data_[i] = data_[i-1];
+	}
+    data_[0] = data;
 
-template<int nSTUBS, int nLAYERS, int nLIMIT>
-void LRHLS_v7<nSTUBS, nLAYERS, nLIMIT>::produce() {
+	if(data.valid == 1) {
 
-	for(int i=nSTUBS-1; i>=0; i--) {
-		stubs_[i] = *(stubsIn_+i);
+		nStubs_ += 1;
+
+		if(nStubs_ == nSTUBS) {
+
+			for (int i=nSTUBS-1; i>=0; i--) {
+				stubs_[i] = data_[i];
+			}
+
+			initFit();
+			calcHelix();
+			calcResidual();
+
+			for(int k=0; k<nSTUBS; k++) {
+
+				if(exit_t())
+					break;
+
+				findLargestResidual();
+				killResidual();
+			}
+
+			nStubs_ = 0;
+
+			for (int i=nSTUBS-1; i>=0; i--) {
+				data_[i] = stubs_[i];
+			}
+		}
 	}
 
-	initFit();
-	calcHelix();
-	calcResidual();
-
-	for(int k=0; k<nSTUBS; k++) {
-
-		if(exit_t())
-			break;
-
-		killResidual();
-
-	}
-
-	for(int i=nSTUBS-1; i>=0; i--) {
-		*(stubsOut_+i) = stubs_[i];
-	}
+	return data_[nSTUBS-1];
 }
 
 template<int nSTUBS, int nLAYERS, int nLIMIT>
 void LRHLS_v7<nSTUBS, nLAYERS, nLIMIT>::initFit() {
 
-	for(int i=nLAYERS-1; i>=0; i--) {
-		population_[i] = 0;
-	}
+	uint1_t foundLayers[nLAYERS] = {0,0,0,0,0,0,0};
+#pragma HLS ARRAY_PARTITION variable=foundLayers complete dim=1
+
+	uint3_t population[nLAYERS] = {0,0,0,0,0,0,0};
+#pragma HLS ARRAY_PARTITION variable=population complete dim=1
 
 	for(int i=nSTUBS-1; i>=0; i--) {
-		population_[stubs_[i].layerId] += 1;
-		residuals_[i] = 0;
+		population[stubs_[i].layerId] += 1;
+		foundLayers[stubs_[i].layerId] = 1;
 	}
 
 	for(int i=nLAYERS-1; i>=0; i--) {
-		if(population_[i] > 0)
-			foundLayers_ += 1;
+		foundLayers_ += foundLayers[i];
+		population_[i] = population[i];
 	}
 }
 
@@ -123,28 +136,30 @@ void LRHLS_v7<nSTUBS, nLAYERS, nLIMIT>::calcResidual() {
 }
 
 template<int nSTUBS, int nLAYERS, int nLIMIT>
-void LRHLS_v7<nSTUBS, nLAYERS, nLIMIT>::killResidual() {
+void LRHLS_v7<nSTUBS, nLAYERS, nLIMIT>::findLargestResidual() {
 
 	dtf_t largest = 0;
-	uint4_t idx = 0;
 
 	for(int i=nSTUBS-1; i>=0; i--) {
 		if(residuals_[i] > largest) {
 			largest = residuals_[i];
-			idx = i;
+			idx_ = i;
 		}
 	}
+}
 
-	nStubs_ -= 1;
-	population_[stubs_[idx].layerId] -= 1;
+template<int nSTUBS, int nLAYERS, int nLIMIT>
+void LRHLS_v7<nSTUBS, nLAYERS, nLIMIT>::killResidual() {
 
-	stubs_[idx].r = 0;
-	stubs_[idx].phi = 0;
-	stubs_[idx].z = 0;
-	stubs_[idx].layerId = 0;
-	stubs_[idx].valid = 0;
+	population_[stubs_[idx_].layerId] -= 1;
 
-	residuals_[idx] = 0;
+	stubs_[idx_].r = 0;
+	stubs_[idx_].phi = 0;
+	stubs_[idx_].z = 0;
+	stubs_[idx_].layerId = 0;
+	stubs_[idx_].valid = 0;
+
+	residuals_[idx_] = 0;
 }
 
 template<int nSTUBS, int nLAYERS, int nLIMIT>
