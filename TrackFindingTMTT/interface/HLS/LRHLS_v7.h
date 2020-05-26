@@ -27,17 +27,17 @@ public:
 	void calcHelix();
 	void calcResidual();
 	void findLargestResidual();
-	void killResidual();
+	void killLargestResidual();
 	uint1_t exit_t();
 
 public:
 
-	data_t data_[nSTUBS];
 	data_t stubs_[nSTUBS];
 	uint3_t population_[nLAYERS];
 	dtf_t residuals_[nSTUBS];
+	uint1_t foundLayers_[nLAYERS];
 	LRTrack parameters_;
-	uint3_t foundLayers_;
+	uint3_t nLayers_;
 	uint4_t nStubs_;
 	uint4_t idx_;
 };
@@ -46,21 +46,24 @@ template<int nSTUBS, int nLAYERS, int nLIMIT>
 data_t LRHLS_v7<nSTUBS, nLAYERS, nLIMIT>::operator()(data_t data) {
 
     for (int i=nSTUBS-1; i>0; i--) {
-    	data_[i] = data_[i-1];
+    	stubs_[i] = stubs_[i-1];
 	}
-    data_[0] = data;
+    stubs_[0] = data;
 
 	if(data.valid == 1) {
+
+		initFit();
 
 		nStubs_ += 1;
 
 		if(nStubs_ == nSTUBS) {
 
-			for (int i=nSTUBS-1; i>=0; i--) {
-				stubs_[i] = data_[i];
+
+			for(int i=nLAYERS-1; i>=0; i--) {
+				nLayers_ += foundLayers_[i];
 			}
 
-			initFit();
+
 			calcHelix();
 			calcResidual();
 
@@ -70,37 +73,50 @@ data_t LRHLS_v7<nSTUBS, nLAYERS, nLIMIT>::operator()(data_t data) {
 					break;
 
 				findLargestResidual();
-				killResidual();
+				killLargestResidual();
 			}
 
+			nLayers_ = 0;
 			nStubs_ = 0;
 
-			for (int i=nSTUBS-1; i>=0; i--) {
-				data_[i] = stubs_[i];
-			}
 		}
 	}
 
-	return data_[nSTUBS-1];
+	return stubs_[nSTUBS-1];
 }
 
 template<int nSTUBS, int nLAYERS, int nLIMIT>
 void LRHLS_v7<nSTUBS, nLAYERS, nLIMIT>::initFit() {
 
-	uint1_t foundLayers[nLAYERS] = {0,0,0,0,0,0,0};
-#pragma HLS ARRAY_PARTITION variable=foundLayers complete dim=1
-
-	uint3_t population[nLAYERS] = {0,0,0,0,0,0,0};
-#pragma HLS ARRAY_PARTITION variable=population complete dim=1
-
-	for(int i=nSTUBS-1; i>=0; i--) {
-		population[stubs_[i].layerId] += 1;
-		foundLayers[stubs_[i].layerId] = 1;
-	}
-
-	for(int i=nLAYERS-1; i>=0; i--) {
-		foundLayers_ += foundLayers[i];
-		population_[i] = population[i];
+	switch(stubs_[0].layerId) {
+	case 1:
+		population_[1]++;
+		foundLayers_[1] = 1;
+		break;
+	case 2:
+		population_[2]++;
+		foundLayers_[2] = 1;
+		break;
+	case 3:
+		population_[3]++;
+		foundLayers_[3] = 1;
+		break;
+	case 4:
+		population_[4]++;
+		foundLayers_[4] = 1;
+		break;
+	case 5:
+		population_[5]++;
+		foundLayers_[5] = 1;
+		break;
+	case 6:
+		population_[6]++;
+		foundLayers_[6] = 1;
+		break;
+	default:
+		population_[0]++;
+		foundLayers_[0] = 1;
+		break;
 	}
 }
 
@@ -112,16 +128,16 @@ void LRHLS_v7<nSTUBS, nLAYERS, nLIMIT>::calcHelix() {
 	dtf_t zSum = 0;
 
 	for(int i=nSTUBS-1; i>=0; i--) {
-		rSum = dtf_t(rSum + (dtf_t(stubs_[i].r) >> foundLayers_));
-		phiSum = dtf_t(phiSum + (dtf_t(stubs_[i].phi) >> foundLayers_));
-		zSum = dtf_t(zSum + (dtf_t(stubs_[i].z) >> foundLayers_));
+		rSum = dtf_t(rSum + (dtf_t(stubs_[i].r) >> nLayers_));
+		phiSum = dtf_t(phiSum + (dtf_t(stubs_[i].phi) >> nLayers_));
+		zSum = dtf_t(zSum + (dtf_t(stubs_[i].z) >> nLayers_));
 	}
 
-	parameters_.sp = slope(foundLayers_, rSum, phiSum);
-	parameters_.ip = intercept(foundLayers_, rSum, phiSum, parameters_.sp);
+	parameters_.sp = slope(nLayers_, rSum, phiSum);
+	parameters_.ip = intercept(nLayers_, rSum, phiSum, parameters_.sp);
 
-	parameters_.sz = slope(foundLayers_, rSum, zSum);
-	parameters_.iz = intercept(foundLayers_, rSum, zSum, parameters_.sz);
+	parameters_.sz = slope(nLayers_, rSum, zSum);
+	parameters_.iz = intercept(nLayers_, rSum, zSum, parameters_.sz);
 }
 
 template<int nSTUBS, int nLAYERS, int nLIMIT>
@@ -149,7 +165,7 @@ void LRHLS_v7<nSTUBS, nLAYERS, nLIMIT>::findLargestResidual() {
 }
 
 template<int nSTUBS, int nLAYERS, int nLIMIT>
-void LRHLS_v7<nSTUBS, nLAYERS, nLIMIT>::killResidual() {
+void LRHLS_v7<nSTUBS, nLAYERS, nLIMIT>::killLargestResidual() {
 
 	population_[stubs_[idx_].layerId] -= 1;
 
@@ -160,6 +176,7 @@ void LRHLS_v7<nSTUBS, nLAYERS, nLIMIT>::killResidual() {
 	stubs_[idx_].valid = 0;
 
 	residuals_[idx_] = 0;
+
 }
 
 template<int nSTUBS, int nLAYERS, int nLIMIT>

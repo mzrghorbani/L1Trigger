@@ -18,9 +18,6 @@ data_t LRHLS_top(data_t data) {
 #pragma HLS PIPELINE II=1
 
 	static LRHLS_v7<STUBS, LAYERS, LIMIT> lrhlsV7;
-#pragma HLS ARRAY_PARTITION variable=lrhlsV7.residuals_ complete dim=1
-#pragma HLS ARRAY_PARTITION variable=lrhlsV7.population_ complete dim=1
-#pragma HLS ARRAY_PARTITION variable=lrhlsV7.stubs_ complete dim=1
 
 	return lrhlsV7(data);
 }
