@@ -14,12 +14,29 @@ namespace TMTT {
 namespace HLS {
 #endif
 
-data_t LRHLS_top(data_t data) {
-#pragma HLS PIPELINE II=1
+void LRHLS_top(data_t dataIn[STUBS], data_t dataOut[STUBS]) {
 
-	static LRHLS_v7<STUBS, LAYERS, LIMIT> lrhlsV7;
+	data_t stubsIn[STUBS];
+	data_t stubsOut[STUBS];
 
-	return lrhlsV7(data);
+	for(int i=0; i<STUBS; i++) {
+		stubsIn[i] = dataIn[i];
+	}
+
+
+	// for (int j = 0; j < STUBS; j++) {
+	// 	std::cout << stubsIn[j].layerId << ", ";
+	// }
+	// std::cout << std::endl;
+
+	LRHLS_v8<STUBS, LAYERS, LIMIT> lrhlsV8(stubsIn, stubsOut);
+
+	lrhlsV8.produce();
+
+	for(int i=0; i<STUBS; i++) {
+		dataOut[i] = stubsOut[i];
+	}
+
 }
 
 #ifdef CMSSW_GIT_HASH

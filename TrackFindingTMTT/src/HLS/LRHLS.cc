@@ -14,67 +14,67 @@ namespace TMTT {
 
     void LRHLS::produce() {
 
-        int i, j, k;
+        int i = 0;
+        int j = 0;
+        int k = 0;
 
         for (auto trackMHT : data_->tracksMHT()) {
 
-            ap_uint<STUBS*45> dataIn = 0;
-            ap_uint<STUBS*45> dataOut = 0;
+            TMTT::HLS::StubHLS dataIn[STUBS];
+            TMTT::HLS::StubHLS dataOut[STUBS];
+
+            for(i = 0; i < STUBS; i++) {
+                dataIn[i].r = 0;
+                dataIn[i].phi = 0;
+                dataIn[i].z = 0;
+                dataIn[i].layerId = 0;
+                dataIn[i].valid = 0;
+                dataOut[i].r = 0;
+                dataOut[i].phi = 0;
+                dataOut[i].z = 0;
+                dataOut[i].layerId = 0;
+                dataOut[i].valid = 0;
+            }
+
+            auto *trackLR = new Track();
 
             i = 0;
             for (auto stubMHT : trackMHT->stubs()) {
 
-                dataIn.range(12+i,0+i) = ap_fixed<32,13>(stubMHT->r()) << 5;
-                dataIn.range(26+i,13+i) = ap_fixed<32,14>(stubMHT->phi()) << 9;
-                dataIn.range(40+i,27+i) = ap_fixed<32,14>(stubMHT->z()) << 4;
-                dataIn.range(43+i,41+i) = ap_uint<3>(stubMHT->layerId());
-                dataIn.range(44+i,44+i) = ap_uint<1>(stubMHT->valid());
-                i+=45;
+                if(stubMHT->valid()) {
+
+                    dataIn[i].r = ap_int<13+6>(TMTT::HLS::dtf_t(stubMHT->r()) << 6);
+                    dataIn[i].phi = ap_int<14+6>(TMTT::HLS::dtf_t(stubMHT->phi()) << 6);
+                    dataIn[i].z = ap_int<14+6>(TMTT::HLS::dtf_t(stubMHT->z()) << 6);
+                    dataIn[i].layerId = TMTT::HLS::uint3_t(stubMHT->layerId());
+                    dataIn[i].valid = TMTT::HLS::uint1_t(stubMHT->valid());
+                    i++;
+                }
             }
 
+
             TMTT::HLS::LRHLS_top(dataIn, dataOut);
-            
-            auto *trackLR = new Track();
 
             k = 0;
-            for (i = 0; i < STUBS*45; i=i+45) {
-                if(ap_uint<1>(dataOut.range(44+i,44+i)) == 1) {
+            for (j = 0; j < STUBS; j++) {
 
-                    k+=1;
+                if(dataOut[j].valid == 1) {
+
+                    k++;
                     Stub *stubLR = new Stub();
 
-                    stubLR->r_ = ap_fixed<32,13>(dataOut.range(12+i,0+i)) >> 5; 
-                    stubLR->phi_ = ap_fixed<32,14>(dataOut.range(26+i,13+i)) >> 9;
-                    stubLR->z_ = ap_fixed<32,14>(dataOut.range(40+i,27+i)) >> 4;
-                    stubLR->layerId_ = ap_uint<3>(dataOut.range(43+i,41+i));
-                    stubLR->valid_ = ap_uint<1>(dataOut.range(44+i,44+i));
+                    stubLR->r_ = double(ap_int<13+6>(dataOut[j].r >> 6));
+                    stubLR->phi_ = double(ap_int<13+6>(dataOut[j].phi >> 6));
+                    stubLR->z_ = double(ap_int<13+6>(dataOut[j].z >> 6));
+                    stubLR->layerId_ = int(dataOut[j].layerId);
+                    stubLR->valid_ = bool(dataOut[j].valid);
 
                     trackLR->stubs_.push_back(stubLR);
                 }
             }
-            if(k > 1) {
-                trackLR->valid_ = true;
-                trackLR->settings_ = trackMHT->settings_;
-                trackLR->tps_ = trackMHT->tps();
-                trackLR->region_ = trackMHT->region();
-                trackLR->parent_ = trackMHT->parent();
-                trackLR->streamId_ = trackMHT->streamId();
-                trackLR->streamPos_ = trackMHT->streamPos();
-                trackLR->cellId_ = trackMHT->cellId();
-                trackLR->secEta_ = trackMHT->secEta();
-                trackLR->secPhi_ = trackMHT->secPhi();
-                trackLR->qOverPt_ = trackMHT->qOverPt();
-                trackLR->phi_ = trackMHT->phi();
-                trackLR->cot_ = trackMHT->cot();
-                trackLR->z_ = trackMHT->z();
-                trackLR->chi2_ = trackMHT->chi2();
-                trackLR->binPhi_ = trackMHT->binPhi();
-                trackLR->binPt_ = trackMHT->binPt();
-
+            
+            if(k >= 2)
                 data_->tracksLRHLS_.push_back(trackLR);
-            }
         }
-
     }
-
 }
