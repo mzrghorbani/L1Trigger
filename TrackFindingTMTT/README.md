@@ -15,7 +15,7 @@ git checkout <version>
 
 scram setup L1Trigger/TrackFindingTMTT/hls.xml 
 
-scram b -j 8
+scram b -j8
 
 cmsRun L1Trigger/TrackFindingTMTT/test/tmtt_tf_analysis_cfg.py Events=10
 ```

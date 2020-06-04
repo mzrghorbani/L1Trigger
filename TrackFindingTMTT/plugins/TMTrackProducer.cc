@@ -64,19 +64,19 @@ TMTrackProducer::TMTrackProducer( const edm::ParameterSet& iConfig ) {
 
 TMTrackProducer::~TMTrackProducer(){
 
-//  delete settings_;
-//  delete data_;
-//  delete converter_;
-//  delete dtc_;
-//  delete gp_;
-//  delete ht_;
-//  delete mht_;
-//  delete lr_;
-//  delete lrhls_;
-//  delete kf_;
-//  delete dr_;
-//  delete demo_;
-//  delete histos_;
+  delete settings_;
+  delete data_;
+  delete converter_;
+  delete dtc_;
+  delete gp_;
+  delete ht_;
+  delete mht_;
+  delete lr_;
+  delete lrhls_;
+  delete kf_;
+  delete dr_;
+  delete demo_;
+  delete histos_;
 
 }
 

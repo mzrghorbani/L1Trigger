@@ -73,7 +73,7 @@ namespace TMTT {
                 }
             }
             
-            if(k >= 2)
+            if(k > 2)
                 data_->tracksLRHLS_.push_back(trackLR);
         }
     }

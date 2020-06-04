@@ -16,26 +16,9 @@ namespace HLS {
 
 void LRHLS_top(data_t dataIn[STUBS], data_t dataOut[STUBS]) {
 
-	data_t stubsIn[STUBS];
-	data_t stubsOut[STUBS];
+	LRHLS_v9<STUBS, LAYERS, LIMIT> lrhlsV9(dataIn, dataOut);
 
-	for(int i=0; i<STUBS; i++) {
-		stubsIn[i] = dataIn[i];
-	}
-
-
-	// for (int j = 0; j < STUBS; j++) {
-	// 	std::cout << stubsIn[j].layerId << ", ";
-	// }
-	// std::cout << std::endl;
-
-	LRHLS_v8<STUBS, LAYERS, LIMIT> lrhlsV8(stubsIn, stubsOut);
-
-	lrhlsV8.produce();
-
-	for(int i=0; i<STUBS; i++) {
-		dataOut[i] = stubsOut[i];
-	}
+	lrhlsV9.produce();
 
 }
 

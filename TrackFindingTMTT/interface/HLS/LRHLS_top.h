@@ -7,10 +7,10 @@ Created by Maziar Ghorbani - Brunel University on 12/06/19.
 
 #ifdef CMSSW_GIT_HASH
 #include "L1Trigger/TrackFindingTMTT/interface/HLS/LRHLS_types.h"
-#include "L1Trigger/TrackFindingTMTT/interface/HLS/LRHLS_v8.h"
+#include "L1Trigger/TrackFindingTMTT/interface/HLS/LRHLS_v9.h"
 #else
 #include "LRHLS_types.h"
-#include "LRHLS_v8.h"
+#include "LRHLS_v9.h"
 #endif
 
 #ifdef CMSSW_GIT_HASH
