@@ -22,7 +22,7 @@
 #define STUBS 12
 #define LAYERS 7
 #define LIMIT 4
-#define STUBWORD 45
+#define STUBWORD 64
 
 #ifdef CMSSW_GIT_HASH
 namespace TMTT {
@@ -31,8 +31,9 @@ namespace HLS {
 #endif
 
 enum {
-    B14 = 14, B13 = 13, B4 = 4, B3 = 3, B1 = 1
+    B19 = 19, B14 = 14, B13 = 13, B4 = 4, B3 = 3, B1 = 1
 };
+
 enum {
     WB = 24, IB = 18, FB = WB - IB
 };
@@ -51,6 +52,7 @@ typedef ap_uint<B3> uint3_t;
 typedef ap_uint<B4> uint4_t;
 typedef ap_int<B13> int13_t;
 typedef ap_int<B14> int14_t;
+typedef ap_uint<B19> uint19_t;
 typedef ap_fixed<WB,IB> dtf_t;
 
 struct StubHLS {
@@ -59,6 +61,7 @@ struct StubHLS {
     int14_t z = 0;
     uint3_t layerId = 0;
     uint1_t valid = 0;
+    uint19_t padding = 0;
 };
 
 typedef StubHLS data_t;
