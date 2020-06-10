@@ -15,7 +15,6 @@ namespace HLS {
 #endif
 
 data_t LRHLS_top(data_t data) {
-#pragma HLS PIPELINE II=1
 
 	static LRHLS_v7<STUBS, LAYERS, LIMIT> lrhlsV7;
 

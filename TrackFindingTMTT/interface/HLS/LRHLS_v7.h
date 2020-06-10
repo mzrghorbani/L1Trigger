@@ -76,9 +76,12 @@ data_t LRHLS_v7<nSTUBS, nLAYERS, nLIMIT>::operator()(data_t data) {
 				killLargestResidual();
 			}
 
+			for(int i=nLAYERS-1; i>=0; i--) {
+				population_[i] = 0;
+				foundLayers_[i] = 0;
+			}
 			nLayers_ = 0;
 			nStubs_ = 0;
-
 		}
 	}
 

@@ -18,63 +18,39 @@ namespace TMTT {
 
         for (auto trackMHT : data_->tracksMHT()) {
 
-            ap_uint<STUBS*45> dataIn = 0;
-            ap_uint<STUBS*45> dataOut = 0;
-
-            i = 0;
-            for (auto stubMHT : trackMHT->stubs()) {
-
-                dataIn.range(12+i,0+i) = ap_fixed<32,13>(stubMHT->r()) << 5;
-                dataIn.range(26+i,13+i) = ap_fixed<32,14>(stubMHT->phi()) << 9;
-                dataIn.range(40+i,27+i) = ap_fixed<32,14>(stubMHT->z()) << 4;
-                dataIn.range(43+i,41+i) = ap_uint<3>(stubMHT->layerId());
-                dataIn.range(44+i,44+i) = ap_uint<1>(stubMHT->valid());
-                i+=45;
-            }
-
-            TMTT::HLS::LRHLS_top(dataIn, dataOut);
-            
             auto *trackLR = new Track();
 
             k = 0;
-            for (i = 0; i < STUBS*45; i=i+45) {
-                if(ap_uint<1>(dataOut.range(44+i,44+i)) == 1) {
+            for (auto stubMHT : trackMHT->stubs()) {
 
-                    k+=1;
-                    Stub *stubLR = new Stub();
+                auto *stubLR = new Stub();
 
-                    stubLR->r_ = ap_fixed<32,13>(dataOut.range(12+i,0+i)) >> 5; 
-                    stubLR->phi_ = ap_fixed<32,14>(dataOut.range(26+i,13+i)) >> 9;
-                    stubLR->z_ = ap_fixed<32,14>(dataOut.range(40+i,27+i)) >> 4;
-                    stubLR->layerId_ = ap_uint<3>(dataOut.range(43+i,41+i));
-                    stubLR->valid_ = ap_uint<1>(dataOut.range(44+i,44+i));
+                TMTT::HLS::StubHLS stubIn;
+                TMTT::HLS::StubHLS stubOut;
 
+                stubIn.r = ap_int<13+6>(TMTT::HLS::dtf_t(stubMHT->r()) << 6);
+                stubIn.phi = ap_int<14+6>(TMTT::HLS::dtf_t(stubMHT->phi()) << 6);
+                stubIn.z = ap_int<14+6>(TMTT::HLS::dtf_t(stubMHT->z()) << 6);
+                stubIn.layerId = TMTT::HLS::uint3_t(stubMHT->layerId());
+                stubIn.valid = TMTT::HLS::uint1_t(stubMHT->valid());
+                stubOut = TMTT::HLS::LRHLS_top(stubIn);
+
+                stubLR->r_ = double(ap_int<13+6>(stubOut.r >> 6));
+                stubLR->phi_ = double(ap_int<13+6>(stubOut.phi >> 6));
+                stubLR->z_ = double(ap_int<13+6>(stubOut.z >> 6));
+                stubLR->layerId_ = int(stubOut.layerId);
+                stubLR->valid_ = bool(stubOut.valid);
+
+                if(stubLR->valid_) {
+                    k++;
                     trackLR->stubs_.push_back(stubLR);
                 }
             }
-            if(k > 1) {
-                trackLR->valid_ = true;
-                trackLR->settings_ = trackMHT->settings_;
-                trackLR->tps_ = trackMHT->tps();
-                trackLR->region_ = trackMHT->region();
-                trackLR->parent_ = trackMHT->parent();
-                trackLR->streamId_ = trackMHT->streamId();
-                trackLR->streamPos_ = trackMHT->streamPos();
-                trackLR->cellId_ = trackMHT->cellId();
-                trackLR->secEta_ = trackMHT->secEta();
-                trackLR->secPhi_ = trackMHT->secPhi();
-                trackLR->qOverPt_ = trackMHT->qOverPt();
-                trackLR->phi_ = trackMHT->phi();
-                trackLR->cot_ = trackMHT->cot();
-                trackLR->z_ = trackMHT->z();
-                trackLR->chi2_ = trackMHT->chi2();
-                trackLR->binPhi_ = trackMHT->binPhi();
-                trackLR->binPt_ = trackMHT->binPt();
 
+            if(k > 1)
                 data_->tracksLRHLS_.push_back(trackLR);
-            }
+            
         }
-
     }
 
 }
