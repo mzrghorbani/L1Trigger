@@ -14,28 +14,11 @@ namespace TMTT {
 namespace HLS {
 #endif
 
-void LRHLS_top(data_t dataIn[STUBS], data_t dataOut[STUBS]) {
+void LRHLS_top(const data_t stubIn[STUBS], data_t stubOut[STUBS]) {
 
-	data_t stubsIn[STUBS];
-	data_t stubsOut[STUBS];
-
-	for(int i=0; i<STUBS; i++) {
-		stubsIn[i] = dataIn[i];
-	}
-
-
-	// for (int j = 0; j < STUBS; j++) {
-	// 	std::cout << stubsIn[j].layerId << ", ";
-	// }
-	// std::cout << std::endl;
-
-	LRHLS_v8<STUBS, LAYERS, LIMIT> lrhlsV8(stubsIn, stubsOut);
+	LRHLS_v8<STUBS, LAYERS, LIMIT> lrhlsV8(stubIn, stubOut);
 
 	lrhlsV8.produce();
-
-	for(int i=0; i<STUBS; i++) {
-		dataOut[i] = stubsOut[i];
-	}
 
 }
 
