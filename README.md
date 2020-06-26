@@ -23,4 +23,4 @@ To run the process:
 Note: The L1Trigger repository is in sync with lr_make_hls_ip repository. To create HLS IP-Core for further processing ensure the versions of L1Trigger and lr_make_hls_ip match and kept in a shared directory:  
 
 	cd git_projects
-	git clone https://gitlab.cern.ch/mghorban1/L1Trigger.git -b <version>
+	git clone https://gitlab.cern.ch/mghorban1/lr_make_hls_ip.git -b <version>
