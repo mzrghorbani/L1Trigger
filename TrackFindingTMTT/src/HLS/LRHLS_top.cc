@@ -16,9 +16,9 @@ namespace HLS {
 
 void LRHLS_top(const data_t stubIn[STUBS], data_t stubOut[STUBS]) {
 
-	LRHLS_v8<STUBS, LAYERS, LIMIT> lrhlsV8(stubIn, stubOut);
+	LRHLS_v10<STUBS, LAYERS, LIMIT> lrhlsV10(stubIn, stubOut);
 
-	lrhlsV8.produce();
+	lrhlsV10.produce();
 
 }
 

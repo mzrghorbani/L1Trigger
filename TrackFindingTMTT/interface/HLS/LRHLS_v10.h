@@ -2,8 +2,8 @@
 Created by Maziar Ghorbani - Brunel University on 12/06/19.
 */
 
-#ifndef __LRHLS_v8_H__
-#define __LRHLS_v8_H__
+#ifndef __LRHLS_v10_H__
+#define __LRHLS_v10_H__
 
 #ifdef CMSSW_GIT_HASH
 #include "L1Trigger/TrackFindingTMTT/interface/HLS/LRHLS_types.h"
@@ -18,11 +18,11 @@ namespace HLS {
 #endif
 
 template<int nSTUBS, int nLAYERS, int nLIMIT>
-class LRHLS_v8 {
+class LRHLS_v10 {
 public:
 
-	LRHLS_v8(const data_t *stubIn, data_t *stubOut);
-	~LRHLS_v8() {}
+	LRHLS_v10(const data_t *stubIn, data_t *stubOut);
+	~LRHLS_v10() {}
 
 	void produce();
 //	void initFit();
@@ -48,13 +48,13 @@ public:
 };
 
 template<int nSTUBS, int nLAYERS, int nLIMIT>
-LRHLS_v8<nSTUBS, nLAYERS, nLIMIT>::LRHLS_v8(const data_t *stubIn, data_t *stubOut)
+LRHLS_v10<nSTUBS, nLAYERS, nLIMIT>::LRHLS_v10(const data_t *stubIn, data_t *stubOut)
 	: stubIn_(stubIn), stubOut_(stubOut), nLayers_(0), idx_(0) {
 
 }
 
 template<int nSTUBS, int nLAYERS, int nLIMIT>
-void LRHLS_v8<nSTUBS, nLAYERS, nLIMIT>::produce() {
+void LRHLS_v10<nSTUBS, nLAYERS, nLIMIT>::produce() {
 
 
 	int i, j;
@@ -199,7 +199,7 @@ void LRHLS_v8<nSTUBS, nLAYERS, nLIMIT>::produce() {
 
 /*
 template<int nSTUBS, int nLAYERS, int nLIMIT>
-void LRHLS_v8<nSTUBS, nLAYERS, nLIMIT>::initFit() {
+void LRHLS_v10<nSTUBS, nLAYERS, nLIMIT>::initFit() {
 
 	int i;
 
@@ -248,7 +248,7 @@ void LRHLS_v8<nSTUBS, nLAYERS, nLIMIT>::initFit() {
 }
 
 template<int nSTUBS, int nLAYERS, int nLIMIT>
-void LRHLS_v8<nSTUBS, nLAYERS, nLIMIT>::calcSums() {
+void LRHLS_v10<nSTUBS, nLAYERS, nLIMIT>::calcSums() {
 
 	int i;
 
@@ -260,7 +260,7 @@ void LRHLS_v8<nSTUBS, nLAYERS, nLIMIT>::calcSums() {
 }
 
 template<int nSTUBS, int nLAYERS, int nLIMIT>
-void LRHLS_v8<nSTUBS, nLAYERS, nLIMIT>::calcHelix() {
+void LRHLS_v10<nSTUBS, nLAYERS, nLIMIT>::calcHelix() {
 
 	parameters_.sp = slope(nLayers_, sums_.r, sums_.phi);
 	parameters_.ip = intercept(nLayers_, sums_.r, sums_.phi, parameters_.sp);
@@ -271,7 +271,7 @@ void LRHLS_v8<nSTUBS, nLAYERS, nLIMIT>::calcHelix() {
 }
 
 template<int nSTUBS, int nLAYERS, int nLIMIT>
-void LRHLS_v8<nSTUBS, nLAYERS, nLIMIT>::calcResidual() {
+void LRHLS_v10<nSTUBS, nLAYERS, nLIMIT>::calcResidual() {
 
 	int i;
 
@@ -284,7 +284,7 @@ void LRHLS_v8<nSTUBS, nLAYERS, nLIMIT>::calcResidual() {
 }
 
 template<int nSTUBS, int nLAYERS, int nLIMIT>
-void LRHLS_v8<nSTUBS, nLAYERS, nLIMIT>::findLargestResidual() {
+void LRHLS_v10<nSTUBS, nLAYERS, nLIMIT>::findLargestResidual() {
 
 	int i;
 	dtf_t largest = 0;
@@ -298,7 +298,7 @@ void LRHLS_v8<nSTUBS, nLAYERS, nLIMIT>::findLargestResidual() {
 }
 
 template<int nSTUBS, int nLAYERS, int nLIMIT>
-void LRHLS_v8<nSTUBS, nLAYERS, nLIMIT>::killLargestResidual() {
+void LRHLS_v10<nSTUBS, nLAYERS, nLIMIT>::killLargestResidual() {
 
 	population_[stubs_[idx_].layerId] -= 1;
 
@@ -313,7 +313,7 @@ void LRHLS_v8<nSTUBS, nLAYERS, nLIMIT>::killLargestResidual() {
 }
 
 template<int nSTUBS, int nLAYERS, int nLIMIT>
-uint1_t LRHLS_v8<nSTUBS, nLAYERS, nLIMIT>::exit_t() {
+uint1_t LRHLS_v10<nSTUBS, nLAYERS, nLIMIT>::exit_t() {
 
 	int i;
 
