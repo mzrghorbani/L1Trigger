@@ -19,7 +19,7 @@ namespace TMTT {
 namespace HLS {
 #endif
 
-void LRHLS_top(const data_t stubIn[STUBS], data_t stubOut[STUBS]);
+void LRHLS_top(hls::stream<word_t> &dataIn, hls::stream<word_t> &dataOut);
 
 #ifdef CMSSW_GIT_HASH
 }

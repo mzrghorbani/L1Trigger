@@ -22,7 +22,6 @@
 #define STUBS 8
 #define LAYERS 7
 #define LIMIT 4
-#define STUBWORD 45
 
 #ifdef CMSSW_GIT_HASH
 namespace TMTT {
@@ -36,6 +35,8 @@ enum {
 enum {
     WB = 24, IB = 18, FB = WB - IB
 };
+
+typedef ap_uint<64> word_t;
 
 // Native variables used in SW
 // typedef int int13_t;

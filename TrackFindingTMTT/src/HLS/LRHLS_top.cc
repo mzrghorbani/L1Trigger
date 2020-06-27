@@ -14,12 +14,11 @@ namespace TMTT {
 namespace HLS {
 #endif
 
-void LRHLS_top(const data_t stubIn[STUBS], data_t stubOut[STUBS]) {
+void LRHLS_top(hls::stream<word_t> &dataIn, hls::stream<word_t> &dataOut) {
 
-	LRHLS_v8<STUBS, LAYERS, LIMIT> lrhlsV8(stubIn, stubOut);
+	LRHLS_v8<STUBS, LAYERS, LIMIT> lrhlsV8(dataIn, dataOut);
 
 	lrhlsV8.produce();
-
 }
 
 #ifdef CMSSW_GIT_HASH
