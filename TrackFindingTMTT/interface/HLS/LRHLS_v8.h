@@ -61,19 +61,19 @@ void LRHLS_v8<nSTUBS, nLAYERS, nLIMIT>::produce() {
 	for(i=0; i<nSTUBS; i++)
 		stubs_[i] = stubsIn_[i];
 
-	initFit();
-	calcSums();
-	calcHelix();
-	calcResidual();
-
-	for(j=0; j<nSTUBS; j++) {
-
-		if(exit_t())
-			break;
-
-		findLargestResidual();
-		killLargestResidual();
-	}
+//	initFit();
+//	calcSums();
+//	calcHelix();
+//	calcResidual();
+//
+//	for(j=0; j<nSTUBS; j++) {
+//
+//		if(exit_t())
+//			break;
+//
+//		findLargestResidual();
+//		killLargestResidual();
+//	}
 
 	for(i=0; i<nSTUBS; i++)
 		stubsOut_[i] = stubs_[i];
